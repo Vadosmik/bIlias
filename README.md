@@ -1,4 +1,4 @@
-# bIlias (Beter Ilias)
+# bIlias (Better Ilias)
 [*English Version*](README-en.md)
 
 ---
