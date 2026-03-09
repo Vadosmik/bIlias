@@ -1,5 +1,6 @@
 # bIlias (Better Ilias)
 
+Wymagany zainstalowany **Docker**
 Aby odpalić projekt i testować: `` docker-compose up --build ``
 
 ## Instrukcja dla Deweloperów (Workflow)
