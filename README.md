@@ -1,5 +1,7 @@
 # bIlias (Better Ilias)
 
+Aby odpalić projekt i testować: `` docker-compose up --build ``
+
 ## Instrukcja dla Deweloperów (Workflow)
 
 Zanim zaczniesz pracę nad nową funkcjonalnością, zawsze upewnij się, że Twój lokalny `dev` jest aktualny. 
