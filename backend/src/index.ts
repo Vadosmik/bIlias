@@ -1,12 +1,10 @@
-import express, {
-  type NextFunction,
-  type Request,
-  type Response,
-} from 'express';
+import express, { type Request, type Response } from 'express';
 import 'dotenv/config';
+import { errorHandler } from './middleware/errorHandler.js';
+import { authRoutes } from './routes/authRoutes.js';
 
 const app = express();
-const port = Number(process.env.PORT);
+const PORT = Number(process.env.PORT || 8080);
 
 app.use(express.json());
 
@@ -18,15 +16,12 @@ app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({ success: true, message: 'Aplikacja dziala!' });
 });
 
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  res.status(500).json({
-    success: false,
-    error: 'Błąd serwera',
-  });
-});
+// Endpoint do testowania logowania
+app.use('/auth', authRoutes);
+app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log(`Serwer działa na porcie ${port}`);
+app.listen(PORT, () => {
+  console.log(`Serwer działa na porcie ${PORT}`);
 });
 
 export { app };
