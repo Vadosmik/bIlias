@@ -15,7 +15,7 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 app.get('/', (_req: Request, res: Response) => {
-  res.status(200).json({ success: true, message: 'Aplikacja dziala' });
+  res.status(200).json({ success: true, message: 'Aplikacja dziala!' });
 });
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
