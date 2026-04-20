@@ -13,7 +13,7 @@ Zawsze pracujemy na osobnych branchach `feature/`.
 ```bash
 git checkout dev                  # Przejdź na dev
 git pull origin dev               # Pobierz najnowsze zmiany od grupy
-git checkout -b feature/nazwa     # Stwórz nowy branch (np. feature/login)
+git checkout -b feature/nazwa     # Stwórz nowy branch (np. feature/nazwa)
 ```
 ### 2. Wysyłanie zmian (Pull Request)
 
@@ -22,9 +22,7 @@ Nie merguj samemu do dev! Po skończeniu pracy wyślij branch na serwer i otwór
 ```bash
 git add .
 git commit -m "Krótki opis zmian"
-git push origin feature/nazwa     # Wyślij branch na serwer
+git push origin feature/nazwa
 ```
-
-Po komendzie push wejdź na GitHub i kliknij "Compare & pull request".
 
 ### Zasada: Nigdy nie robimy push bezpośrednio na main ani dev.
