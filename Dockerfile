@@ -11,7 +11,7 @@ EXPOSE 3000
 
 CMD ["npm", "run", "dev"]
 
-#  WERSJA PRODUKCYJNA
+# === WERSJA PRODUKCYJNA ===
 # FROM node:22 as build
 # WORKDIR /app
 # COPY package*.json ./
