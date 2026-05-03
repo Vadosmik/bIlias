@@ -28,16 +28,18 @@ services:
       - db
   
   db:
-    image: postgres:17
+    build: ./postgres
     container_name: bllias-db
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: dbname
-    volumes:
-      - db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: bilias
+      POSTGRES_PASSWORD: kernel21
+      POSTGRES_DB: bilias
+    networks:
+      - app-net
 
 
 networks:
