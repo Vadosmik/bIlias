@@ -4,9 +4,9 @@ import { AuthService } from '../services/authService.js';
 const authService = new AuthService();
 
 export class AuthController {
-  public login(req: Request, res: Response): void {
+  public async login(req: Request, res: Response): Promise<void> {
     try {
-      const result = authService.login({
+      const result = await authService.login({
         email: String(req.body?.email ?? ''),
         password: String(req.body?.password ?? ''),
       });
@@ -19,6 +19,29 @@ export class AuthController {
       const message = error instanceof Error ? error.message : 'Blad logowania';
 
       res.status(401).json({
+        success: false,
+        error: message,
+      });
+    }
+  }
+
+  public async register(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await authService.register({
+        email: String(req.body?.email ?? ''),
+        password: String(req.body?.password ?? ''),
+        imie: String(req.body?.imie ?? ''),
+        nazwisko: String(req.body?.nazwisko ?? ''),
+      });
+
+      res.status(201).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Blad rejestracji';
+
+      res.status(400).json({
         success: false,
         error: message,
       });
