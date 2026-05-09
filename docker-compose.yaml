@@ -1,0 +1,50 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: bllias-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - app-net
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    container_name: bllias-backend
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgres://user:pass@db:5432/dbname
+    networks:
+      - app-net
+    depends_on:
+      - db
+  
+  db:
+    build: ./postgres
+    container_name: bllias-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: bilias
+      POSTGRES_PASSWORD: kernel21
+      POSTGRES_DB: bilias
+    networks:
+      - app-net
+
+
+networks:
+  app-net:
+    driver: bridge
+  
+volumes:
+  db-data:
