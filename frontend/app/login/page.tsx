@@ -17,7 +17,23 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    if (!emailRegex.test(email)) {
+      setError("Wprowadź poprawny adres e-mail (np. imie.nazwisko@umg.edu.pl)");
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      setError("Hasło musi mieć co najmniej 8 znaków, wielką literę i cyfrę");
+      return;
+    }
+
     setLoading(true);
+
     try {
       const res = await mockApi.login({ email, password });
       console.log("[mock] zalogowano:", res);
@@ -42,7 +58,7 @@ export default function LoginPage() {
         </span>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <Field
           icon={<Mail className="h-4 w-4" />}
           label="E-mail uczelniany"
