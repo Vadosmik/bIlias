@@ -21,6 +21,31 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    const emailRegex = /^[^\s@]+@student\.umg\.edu\.pl$/; 
+    const nameRegex = /^[A-Za-zżźćńółęąśŻŹĆŃÓŁĘĄŚ]{3,}$/; 
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/; 
+
+    if (!nameRegex.test(firstName)) {
+      setError("Imię powinno zawierać tylko litery (min. 3)");
+      return;
+    }
+
+    if (!nameRegex.test(lastName)) {
+      setError("Nazwisko powinno zawierać tylko litery (min. 3)");
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setError("Użyj oficjalnego maila UMG (@student.umg.edu.pl)");
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      setError("Hasło nie spełnia wymagań (8 znaków, wielka litera, cyfra)");
+      return;
+    }
+
     if (!accepted) {
       setError("Musisz zaakceptować regulamin platformy");
       return;
@@ -50,7 +75,7 @@ export default function RegisterPage() {
         </span>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Role toggle */}
         <div>
           <span className="mb-1.5 block text-sm font-medium">Jestem</span>
