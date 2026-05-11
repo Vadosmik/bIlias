@@ -21,7 +21,7 @@ services:
       - ./backend:/app
       - /app/node_modules
     environment:
-      - DATABASE_URL=postgres://user:pass@db:5432/dbname
+      - DATABASE_URL=postgres://bilias:kernel21@db:5432/bilias
     networks:
       - app-net
     depends_on:

@@ -51,9 +51,29 @@ export default function RegisterPage() {
       return;
     }
     setLoading(true);
+
     try {
-      const res = await mockApi.register({ firstName, lastName, email, password, role });
-      console.log("[mock] zarejestrowano:", res);
+      const response = await fetch("http://localhost:8080/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          email: email, 
+          password: password, 
+          imie: firstName,
+          nazwisko: lastName,
+          role: role
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Błąd rejestracji");
+      }
+
+      console.log("Konto założone pomyślnie!", result.data);
       router.push("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Wystąpił błąd");

@@ -35,11 +35,24 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await mockApi.login({ email, password });
-      console.log("[mock] zalogowano:", res);
+      const response = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Błędny e-mail lub hasło");
+      }
+
+      console.log("Zalogowano przez API:", result.data);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Wystąpił błąd");
+      setError(err instanceof Error ? err.message : "Błąd połączenia z serwerem");
     } finally {
       setLoading(false);
     }
