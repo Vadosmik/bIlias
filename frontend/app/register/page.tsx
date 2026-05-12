@@ -21,14 +21,59 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    const emailRegex = /^[^\s@]+@student\.umg\.edu\.pl$/; 
+    const nameRegex = /^[A-Za-zżźćńółęąśŻŹĆŃÓŁĘĄŚ]{3,}$/; 
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/; 
+
+    if (!nameRegex.test(firstName)) {
+      setError("Imię powinno zawierać tylko litery (min. 3)");
+      return;
+    }
+
+    if (!nameRegex.test(lastName)) {
+      setError("Nazwisko powinno zawierać tylko litery (min. 3)");
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setError("Użyj oficjalnego maila UMG (@student.umg.edu.pl)");
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      setError("Hasło nie spełnia wymagań (8 znaków, wielka litera, cyfra)");
+      return;
+    }
+
     if (!accepted) {
       setError("Musisz zaakceptować regulamin platformy");
       return;
     }
     setLoading(true);
+
     try {
-      const res = await mockApi.register({ firstName, lastName, email, password, role });
-      console.log("[mock] zarejestrowano:", res);
+      const response = await fetch("http://localhost:8080/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          email: email, 
+          password: password, 
+          imie: firstName,
+          nazwisko: lastName,
+          role: role
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Błąd rejestracji");
+      }
+
+      console.log("Konto założone pomyślnie!", result.data);
       router.push("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Wystąpił błąd");
@@ -50,7 +95,7 @@ export default function RegisterPage() {
         </span>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Role toggle */}
         <div>
           <span className="mb-1.5 block text-sm font-medium">Jestem</span>

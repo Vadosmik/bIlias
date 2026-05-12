@@ -17,13 +17,42 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    if (!emailRegex.test(email)) {
+      setError("Wprowadź poprawny adres e-mail (np. imie.nazwisko@umg.edu.pl)");
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      setError("Hasło musi mieć co najmniej 8 znaków, wielką literę i cyfrę");
+      return;
+    }
+
     setLoading(true);
+
     try {
-      const res = await mockApi.login({ email, password });
-      console.log("[mock] zalogowano:", res);
+      const response = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Błędny e-mail lub hasło");
+      }
+
+      console.log("Zalogowano przez API:", result.data);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Wystąpił błąd");
+      setError(err instanceof Error ? err.message : "Błąd połączenia z serwerem");
     } finally {
       setLoading(false);
     }
@@ -42,7 +71,7 @@ export default function LoginPage() {
         </span>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <Field
           icon={<Mail className="h-4 w-4" />}
           label="E-mail uczelniany"
