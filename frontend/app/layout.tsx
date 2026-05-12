@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lexend_Deca, Noto_Serif_Georgian } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 const lexend = Lexend_Deca({
   subsets: ["latin"],
@@ -26,7 +27,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${lexend.variable} ${notoSerif.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
