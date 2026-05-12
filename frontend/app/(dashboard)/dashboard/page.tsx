@@ -80,12 +80,18 @@ export default function DashboardPage() {
         {courses.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {courses.map((course) => (
-              <Link 
-                key={course.id} 
+              <Link
+                key={course.id}
                 href={`/courses/${course.id}`}
-                className="group bg-white p-6 rounded-2xl border border-brand-gray/10 shadow-brand-sm hover:border-brand-sand transition-all duration-300 flex flex-col"
+                className="group bg-white p-6 rounded-2xl border border-brand-gray/10 shadow-brand-sm hover:border-brand-sand transition-all duration-300 flex flex-col overflow-hidden"
               >
-                <div className="flex justify-between items-start mb-4">
+                {course.backgroundImage && (
+                  <div
+                    className="absolute inset-0 w-full h-32 -mx-6 -mt-6 mb-4 bg-cover bg-center opacity-50 group-hover:opacity-70 transition-opacity"
+                    style={{ backgroundImage: `url(${course.backgroundImage})` }}
+                  />
+                )}
+                <div className="relative flex justify-between items-start mb-4">
                   <div>
                     <span className="text-[10px] uppercase tracking-widest font-bold text-brand-sand mb-1 block">
                       {course.code}
@@ -100,17 +106,11 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Progress Bar */}
+                {/* Course Card */}
                 <div className="mt-auto pt-6 border-t border-brand-gray/5">
-                  <div className="flex justify-between text-xs mb-2">
-                    <span className="font-medium text-muted-foreground">Postęp kursu</span>
-                    <span className="font-bold text-brand-navy">{course.progress}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-brand-light rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-brand-navy transition-all duration-500" 
-                      style={{ width: `${course.progress}%` }}
-                    ></div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-muted-foreground">{course.materials?.length || 0} materiałów</span>
+                    <span className="font-bold text-brand-navy">{course.ects || 0} ECTS</span>
                   </div>
                 </div>
               </Link>
