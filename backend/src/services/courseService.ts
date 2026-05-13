@@ -6,15 +6,9 @@ const joinCourseSchema = z.object({
   userId: z.number().int().positive(),
 });
 
-function generateCode(nazwa: string, rokStart: number): string {
-  const words = nazwa.split(' ').filter(w => w.length > 0);
-  let code = '';
-  for (const word of words) {
-    if (code.length >= 4) break;
-    code += word[0].toUpperCase();
-  }
-  while (code.length < 3) code += 'X';
-  return `${code}-${rokStart}`;
+function generateCode(id: number, nazwa: string): string {
+  const prefix = nazwa.replace(/\s+/g, '').substring(0, 2).toUpperCase();
+  return `${id}${prefix}`;
 }
 
 export interface MaterialDTO {
@@ -61,7 +55,7 @@ export class CourseService {
         return {
           id: course.id,
           name: course.nazwa,
-          code: generateCode(course.nazwa, course.rok_start),
+          code: generateCode(course.id, course.nazwa),
           department: 'Wydział Elektryczny',
           semester: course.semestr,
           lecturers,
@@ -82,7 +76,7 @@ export class CourseService {
         return {
           id: course.id,
           name: course.nazwa,
-          code: generateCode(course.nazwa, course.rok_start),
+          code: generateCode(course.id, course.nazwa),
           department: 'Wydział Elektryczny',
           semester: course.semestr,
           lecturers,
@@ -103,7 +97,7 @@ export class CourseService {
     return {
       id: course.id,
       name: course.nazwa,
-      code: generateCode(course.nazwa, course.rok_start),
+      code: generateCode(course.id, course.nazwa),
       department: 'Wydział Elektryczny',
       semester: course.semestr,
       lecturers,

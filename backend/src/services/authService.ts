@@ -49,17 +49,29 @@ export class AuthService {
       throw new Error('Niepoprawne dane rejestracji: ' + parsed.error.errors.map(e => e.message).join(', '));
     }
 
+    const { email, role } = parsed.data;
+
+    if ((role === 'wykladowca' || role === 'teacher') && !email.endsWith('@umg.edu.pl')) {
+      throw new Error('Wykładowca musi posiadać adres w domenie @umg.edu.pl');
+    }
+
+    if ((role === 'student') && !email.endsWith('@student.umg.edu.pl')) {
+      throw new Error('Student musi posiadać adres w domenie @student.umg.edu.pl');
+    }
+
     const existingUser = await userRepository.findByEmail(parsed.data.email);
     if (existingUser) {
       throw new Error('Uzytkownik o tym adresie email juz istnieje');
     }
+
+    const normalizedRole = (role === 'wykladowca') ? 'teacher' : (role || 'student');
 
     const createInput: CreateUserInput = {
       email: parsed.data.email,
       password: parsed.data.password,
       imie: parsed.data.imie,
       nazwisko: parsed.data.nazwisko,
-      role: parsed.data.role,
+      role: normalizedRole,
     };
 
     const user = await userRepository.create(createInput);
@@ -80,7 +92,7 @@ export class AuthService {
 
     const userRoles = await userRepository.getUserRoles(user.id);
     console.log('User roles:', userRoles);
-    const userRole = userRoles[0]?.role || parsed.data.role || 'student';
+    const userRole = userRoles[0]?.role || normalizedRole || 'student';
 
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
