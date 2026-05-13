@@ -22,7 +22,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
 
-    const emailRegex = /^[^\s@]+@student\.umg\.edu\.pl$/; 
+    const emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9.-]+\.umg\.edu\.pl$/; 
     const nameRegex = /^[A-Za-zżźćńółęąśŻŹĆŃÓŁĘĄŚ]{3,}$/; 
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/; 
 
@@ -37,7 +37,7 @@ export default function RegisterPage() {
     }
 
     if (!emailRegex.test(email)) {
-      setError("Użyj oficjalnego maila UMG (@student.umg.edu.pl)");
+      setError("Użyj oficjalnego maila UMG (@umg.edu.pl)");
       return;
     }
 
@@ -125,7 +125,7 @@ export default function RegisterPage() {
           label="E-mail uczelniany"
           value={email}
           onChange={setEmail}
-          placeholder="imie.nazwisko@umg.edu.pl"
+          placeholder="twoj.mail@umg.edu.pl"
           autoComplete="email"
           required
         />

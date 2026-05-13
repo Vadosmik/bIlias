@@ -375,15 +375,15 @@ INSERT INTO role (nazwa) VALUES
 
 -- Teacher: jan.kowalski@umg.edu.pl / Test1234
 INSERT INTO uzytkownicy (email, hash_hasla, imie, nazwisko, organizacja_id, aktywny) VALUES
-('jan.kowalski@umg.edu.pl', '$2b$10$rIC0lwMdK8p0p0zD3z1X4O8X5hKQJ0wKsN.xJ8qX5hKQJ0wKsN', 'Jan', 'Kowalski', 1, true);
+('jan.kowalski@umg.edu.pl', '$2b$10$KQGVLgpuIXTm40aFyPyQiuAto62CYaYoDTmJhTI3bkusTlFiy8rtq', 'Jan', 'Kowalski', 1, true);
 
 -- Student: anna.nowak@student.umg.edu.pl / Test1234
 INSERT INTO uzytkownicy (email, hash_hasla, imie, nazwisko, organizacja_id, aktywny) VALUES
-('anna.nowak@student.umg.edu.pl', '$2b$10$rIC0lwMdK8p0p0zD3z1X4O8X5hKQJ0wKsN.xJ8qX5hKQJ0wKsN', 'Anna', 'Nowak', 1, true);
+('anna.nowak@student.umg.edu.pl', '$2b$10$Yspcuf8tSyOUcUK.pNp.EepEdK1LsWxYODfAnRoqi7JQCYUhRREcy', 'Anna', 'Nowak', 1, true);
 
 -- Student: piotr.zielinski@student.umg.edu.pl / Test1234
 INSERT INTO uzytkownicy (email, hash_hasla, imie, nazwisko, organizacja_id, aktywny) VALUES
-('piotr.zielinski@student.umg.edu.pl', '$2b$10$rIC0lwMdK8p0p0zD3z1X4O8X5hKQJ0wKsN.xJ8qX5hKQJ0wKsN', 'Piotr', 'Zieliński', 1, true);
+('piotr.zielinski@student.umg.edu.pl', '$2b$10$Yspcuf8tSyOUcUK.pNp.EepEdK1LsWxYODfAnRoqi7JQCYUhRREcy', 'Piotr', 'Zieliński', 1, true);
 
 -- ----------------------------------------
 -- 4. PRZYPISANIE ROL
