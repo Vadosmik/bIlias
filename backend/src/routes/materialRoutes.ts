@@ -20,12 +20,41 @@ materialRoutes.get('/courses/:kursId/materials', (req: Request, res: Response) =
   materialController.getByKursId(req, res);
 });
 
-materialRoutes.post('/courses/:kursId/materials', upload.single('file'), (req: Request, res: Response) => {
+materialRoutes.post('/courses/:kursId/materials', upload.array('files'), (req: Request, res: Response) => {
   materialController.upload(req, res);
+});
+
+materialRoutes.post('/courses/:kursId/tasks', (req: Request, res: Response) => {
+  materialController.createTask(req, res);
 });
 
 materialRoutes.get('/materials/:id/download', (req: Request, res: Response) => {
   materialController.download(req, res);
+});
+
+// New routes for material/task management
+materialRoutes.patch('/materials/:id', (req: Request, res: Response) => {
+  materialController.updateMaterial(req, res);
+});
+
+materialRoutes.delete('/materials/:id', (req: Request, res: Response) => {
+  materialController.deleteMaterial(req, res);
+});
+
+materialRoutes.patch('/tasks/:id', (req: Request, res: Response) => {
+  materialController.updateTask(req, res);
+});
+
+materialRoutes.delete('/tasks/:id', (req: Request, res: Response) => {
+  materialController.deleteTask(req, res);
+});
+
+materialRoutes.patch('/courses/:kursId/folders', (req: Request, res: Response) => {
+  materialController.renameFolder(req, res);
+});
+
+materialRoutes.delete('/courses/:kursId/folders', (req: Request, res: Response) => {
+  materialController.deleteFolder(req, res);
 });
 
 export { materialRoutes };

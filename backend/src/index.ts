@@ -5,6 +5,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { authRoutes } from './routes/authRoutes.js';
 import { courseRoutes } from './routes/courseRoutes.js';
 import { materialRoutes } from './routes/materialRoutes.js';
+import { submissionRoutes } from './routes/submissionRoutes.js';
 import path from 'path';
 
 const app = express();
@@ -23,6 +24,7 @@ app.get('/', (_req: Request, res: Response) => {
 
 app.use('/auth', authRoutes);
 app.use('/courses', courseRoutes);
+app.use('/submissions', submissionRoutes);
 app.use('/', materialRoutes);
 app.use('/uploads', express.static('uploads'));
 app.use(errorHandler);

@@ -22,12 +22,21 @@ export default function DashboardPage() {
 		const fetchCourses = async () => {
 			if (user) {
 				const data = await api.courses.getUserCourses(user.id);
-				setCourses(data);
 
-				// Flatten tasks from all courses
+				//data+materials
+				const courseWithMaterials = await Promise.all(
+					data.map(async course => {
+						const materials = await api.materials.getByCourseId(course.id);
+
+						return { ...course, materials };
+					}),
+				);
+				setCourses(courseWithMaterials);
+
+				// To narazie nie działa, porzucone z względu na małą ilość czasu
 				const tasks: (Material & { courseName: string; courseId: number })[] =
 					[];
-				data.forEach(course => {
+				courseWithMaterials.forEach(course => {
 					course.materials?.forEach(m => {
 						if (m.type === 'task') {
 							tasks.push({
@@ -56,57 +65,34 @@ export default function DashboardPage() {
 	return (
 		<div className='space-y-8'>
 			{/* Welcome Section */}
-			<section>
-				<h1 className='text-3xl font-bold text-brand-navy'>
-					Witaj ponownie, {user?.firstName}! 👋
-				</h1>
-				<p className='text-muted-foreground mt-2'>
-					{isLecturer ? (
-						<p>Prowadzisz {courses.length} kursów w tym semestrze.</p>
-					) : (
-						<p>Masz {courses.length} aktywnych kursów w tym semestrze.</p>
-					)}
-				</p>
-			</section>
+			<section className='grid grid-cols-1 sm:grid-cols-2 gap-6 content-end '>
+				<div>
+					<h1 className='text-3xl font-bold text-brand-navy'>
+						Witaj ponownie, {user?.firstName}! 👋
+					</h1>
+					<p className='text-muted-foreground mt-2'>
+						{isLecturer
+							? `Prowadzisz ${courses.length} kursów w tym semestrze.`
+							: `Masz ${courses.length} aktywnych kursów w tym semestrze.`}
+					</p>
+				</div>
 
-			{/* Stats Grid */}
-			{!isLecturer && (
-				<div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-					<div className='bg-white p-6 rounded-2xl border border-brand-gray/10 shadow-brand-sm'>
-						<div className='w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4'>
-							<BookOpen className='w-6 h-6' />
-						</div>
-						<p className='text-sm font-medium text-muted-foreground'>
-							Aktywne Kursy
-						</p>
-						<p className='text-2xl font-bold text-brand-navy'>
-							{courses.length}
-						</p>
-					</div>
+				{!isLecturer && (
 					<div
 						onClick={() => setIsTasksModalOpen(true)}
-						className='bg-white p-6 rounded-2xl border border-brand-gray/10 shadow-brand-sm cursor-pointer hover:border-brand-sand transition-colors group'>
-						<div className='w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600 mb-4 group-hover:scale-110 transition-transform'>
-							<Clock className='w-6 h-6' />
-						</div>
-						<p className='text-sm font-medium text-muted-foreground'>
+						className='cursor-pointer hover:border-brand-sand transition-colors group w-full flex justify-end items-center gap-3'>
+						<p className='text-m font-medium text-muted-foreground'>
 							Zadania do oddania
 						</p>
 						<p className='text-2xl font-bold text-brand-navy'>
 							{allTasks.length}
 						</p>
-					</div>
-					<div className='bg-white p-6 rounded-2xl border border-brand-gray/10 shadow-brand-sm'>
-						<div className='w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 mb-4'>
-							<Users className='w-6 h-6' />
+						<div className='w-12 h-12 rounded-xl flex items-center justify-center text-brand-navy hover:text-brand-sand transition-text duration-300'>
+							<Clock className='w-6 h-6' />
 						</div>
-						<p className='text-sm font-medium text-muted-foreground'>
-							Twoja grupa
-						</p>
-						<p className='text-2xl font-bold text-brand-navy'>E-III-6</p>
 					</div>
-				</div>
-			)}
+				)}
+			</section>
 
 			{/* Tasks Modal */}
 			<Modal
@@ -187,8 +173,8 @@ export default function DashboardPage() {
 											{course.lecturers[0]}
 										</p>
 									</div>
-									<div className='w-10 h-10 bg-brand-light rounded-lg flex items-center justify-center text-brand-navy group-hover:bg-brand-sand transition-colors'>
-										<ArrowRight className='w-5 h-5 transition-transform group-hover:scale-110' />
+									<div className='w-10 h-10 bg-brand-light rounded-lg flex items-center justify-center text-brand-navy group-hover:text-brand-light group-hover:bg-brand-sand transition-colors'>
+										<ArrowRight className='w-5 h-5' />
 									</div>
 								</div>
 
@@ -197,9 +183,6 @@ export default function DashboardPage() {
 									<div className='flex items-center justify-between text-xs'>
 										<span className='font-medium text-muted-foreground'>
 											{course.materials?.length || 0} materiałów
-										</span>
-										<span className='font-bold text-brand-navy'>
-											{course.ects || 0} ECTS
 										</span>
 									</div>
 								</div>

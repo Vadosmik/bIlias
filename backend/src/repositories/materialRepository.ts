@@ -105,6 +105,46 @@ export const materialRepository = {
     return rootItems;
   },
 
+  async updateMaterial(id: number, data: { tytul?: string }): Promise<void> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (data.tytul !== undefined) {
+      fields.push(`tytul = $${idx++}`);
+      values.push(data.tytul);
+    }
+
+    if (fields.length === 0) return;
+
+    values.push(id);
+    await pool.query(
+      `UPDATE materialy SET ${fields.join(', ')} WHERE id = $${idx}`,
+      values
+    );
+  },
+
+  async deleteMaterial(id: number): Promise<void> {
+    await pool.query('UPDATE materialy SET deleted_at = NOW() WHERE id = $1', [id]);
+  },
+
+  async deleteByFolderPrefix(kursId: number, folderPrefix: string): Promise<void> {
+    await pool.query(
+      `UPDATE materialy SET deleted_at = NOW() 
+       WHERE kurs_id = $1 AND (tytul = $2 OR tytul LIKE $3) AND deleted_at IS NULL`,
+      [kursId, folderPrefix, `${folderPrefix} - %`]
+    );
+  },
+
+  async findByKursIdAndFolderPrefix(kursId: number, folderPrefix: string): Promise<Material[]> {
+    const result = await pool.query(
+      `SELECT * FROM materialy 
+       WHERE kurs_id = $1 AND (tytul = $2 OR tytul LIKE $3) AND deleted_at IS NULL`,
+      [kursId, folderPrefix, `${folderPrefix} - %`]
+    );
+    return result.rows;
+  },
+
   async findTypPlikuById(id: number): Promise<TypPliku | null> {
     const result = await pool.query(
       'SELECT * FROM typ_pliku_slownik WHERE id = $1',
@@ -128,6 +168,68 @@ export const zadanieRepository = {
       [kursId]
     );
     return result.rows;
+  },
+
+  async findById(id: number): Promise<Zadanie | null> {
+    const result = await pool.query(
+      'SELECT * FROM zadania WHERE id = $1',
+      [id]
+    );
+    return result.rows[0] || null;
+  },
+
+  async updateTask(id: number, data: { tytul?: string, opis?: string, terminOddania?: string }): Promise<void> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (data.tytul !== undefined) {
+      fields.push(`tytul = $${idx++}`);
+      values.push(data.tytul);
+    }
+    if (data.opis !== undefined) {
+      fields.push(`opis = $${idx++}`);
+      values.push(data.opis);
+    }
+    if (data.terminOddania !== undefined) {
+      fields.push(`termin_oddania = $${idx++}`);
+      values.push(data.terminOddania);
+    }
+
+    if (fields.length === 0) return;
+
+    values.push(id);
+    await pool.query(
+      `UPDATE zadania SET ${fields.join(', ')} WHERE id = $${idx}`,
+      values
+    );
+  },
+
+  async deleteTask(id: number): Promise<void> {
+    await pool.query('DELETE FROM zadania WHERE id = $1', [id]);
+  },
+
+  async deleteByFolderPrefix(kursId: number, folderPrefix: string): Promise<void> {
+    await pool.query(
+      `DELETE FROM zadania 
+       WHERE kurs_id = $1 AND (tytul = $2 OR tytul LIKE $3)`,
+      [kursId, folderPrefix, `${folderPrefix} - %`]
+    );
+  },
+
+  async createTask(data: {
+    kursId: number;
+    tytul: string;
+    opis: string;
+    terminOddania: string;
+  }): Promise<Zadanie> {
+    const result = await pool.query(
+      `INSERT INTO zadania (kurs_id, tytul, opis, termin_oddania, max_punkty, status_id, utworzono)
+       VALUES ($1, $2, $3, $4, 0, 1, NOW())
+       RETURNING *`,
+      [data.kursId, data.tytul, data.opis, data.terminOddania]
+    );
+    return result.rows[0];
   },
 
   async findStatusZadaniaById(id: number): Promise<{ id: number; nazwa: string } | null> {
