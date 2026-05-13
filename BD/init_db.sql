@@ -299,3 +299,199 @@ CREATE INDEX idx_wiadomosci_watek_time ON wiadomosci(watek_id, wyslano);
 CREATE INDEX idx_wiadomosci_nadawca ON wiadomosci(nadawca_id);
 
 CREATE INDEX idx_aktualnosci_kurs ON aktualnosci(kurs_id);
+
+-- =========================
+-- SEED DATA: ROLE (RBAC)
+-- =========================
+-- ========================================
+-- PRZYKŁADOWE DANE TESTOWE DLA bIlias
+-- ========================================
+-- ----------------------------------------
+-- 1. SŁOWNIKI (muszą być przed FK)
+-- ----------------------------------------
+
+INSERT INTO organizacje (nazwa) VALUES ('Uniwersytet Morski w Gdyni');
+
+INSERT INTO status_zapisu_slownik (nazwa) VALUES
+    ('aktywny'),
+    ('zakończony'),
+    ('w trakcie');
+
+INSERT INTO status_przeslania_slownik (nazwa) VALUES
+    ('oczekuje'),
+    ('sprawdzone'),
+    ('odbr reje');
+
+INSERT INTO status_wiadomosci_slownik (nazwa) VALUES
+    ('nowa'),
+    ('przeczytana'),
+    ('usunieta');
+
+INSERT INTO status_zadania_slownik (nazwa) VALUES
+    ('aktywne'),
+    ('zakończone'),
+    ('archiwalne');
+
+INSERT INTO typ_kursu_slownik (nazwa) VALUES
+    ('wykład'),
+    ('laboratorium'),
+    ('projekt');
+
+INSERT INTO typ_pliku_slownik (nazwa) VALUES
+    ('pdf'),
+    ('docx'),
+    ('zip'),
+    ('txt');
+
+INSERT INTO typ_zadania_slownik (nazwa) VALUES
+    ('domowe'),
+    ('laboratoryjne'),
+    ('projektowe');
+
+INSERT INTO typ_aktualnosci_slownik (nazwa) VALUES
+    ('ogłoszenie'),
+    ('zmiana'),
+    ('przypomnienie');
+
+INSERT INTO dzien_tygodnia_slownik (nazwa) VALUES
+    ('Poniedziałek'),
+    ('Wtorek'),
+    ('Środa'),
+    ('Czwartek'),
+    ('Piątek');
+
+-- ----------------------------------------
+-- 2. ROLE (RBAC)
+-- ----------------------------------------
+
+INSERT INTO role (nazwa) VALUES
+    ('student'),
+    ('teacher'),
+    ('admin');
+
+-- ----------------------------------------
+-- 3. UŻYTKOWNICY (hasła to bcrypt 'test1234')
+-- ----------------------------------------
+
+-- Teacher: jan.kowalski@umg.edu.pl / Test1234
+INSERT INTO uzytkownicy (email, hash_hasla, imie, nazwisko, organizacja_id, aktywny) VALUES
+('jan.kowalski@umg.edu.pl', '$2b$10$KQGVLgpuIXTm40aFyPyQiuAto62CYaYoDTmJhTI3bkusTlFiy8rtq', 'Jan', 'Kowalski', 1, true);
+
+-- Student: anna.nowak@student.umg.edu.pl / Test1234
+INSERT INTO uzytkownicy (email, hash_hasla, imie, nazwisko, organizacja_id, aktywny) VALUES
+('anna.nowak@student.umg.edu.pl', '$2b$10$Yspcuf8tSyOUcUK.pNp.EepEdK1LsWxYODfAnRoqi7JQCYUhRREcy', 'Anna', 'Nowak', 1, true);
+
+-- Student: piotr.zielinski@student.umg.edu.pl / Test1234
+INSERT INTO uzytkownicy (email, hash_hasla, imie, nazwisko, organizacja_id, aktywny) VALUES
+('piotr.zielinski@student.umg.edu.pl', '$2b$10$Yspcuf8tSyOUcUK.pNp.EepEdK1LsWxYODfAnRoqi7JQCYUhRREcy', 'Piotr', 'Zieliński', 1, true);
+
+-- ----------------------------------------
+-- 4. PRZYPISANIE ROL
+-- ----------------------------------------
+
+INSERT INTO uzytkownik_role (user_id, role_id)
+SELECT u.id, r.id FROM uzytkownicy u, role r
+WHERE u.email = 'jan.kowalski@umg.edu.pl' AND r.nazwa = 'teacher';
+
+INSERT INTO uzytkownik_role (user_id, role_id)
+SELECT u.id, r.id FROM uzytkownicy u, role r
+WHERE u.email = 'anna.nowak@student.umg.edu.pl' AND r.nazwa = 'student';
+
+INSERT INTO uzytkownik_role (user_id, role_id)
+SELECT u.id, r.id FROM uzytkownicy u, role r
+WHERE u.email = 'piotr.zielinski@student.umg.edu.pl' AND r.nazwa = 'student';
+
+-- ----------------------------------------
+-- 5. KURSY
+-- ----------------------------------------
+
+INSERT INTO kursy (organizacja_id, nazwa, opis, ects, semestr, rok_start, rok_koniec) VALUES
+(1, 'Programowanie Obiektowe', 'Wprowadzenie do programowania obiektowego w C++ i Java. Studenci poznają zasady OOP: dziedziczenie, polimorfizm, enkapsulację.', 5, 1, 2025, 2026);
+
+INSERT INTO kursy (organizacja_id, nazwa, opis, ects, semestr, rok_start, rok_koniec) VALUES
+(1, 'Bazy Danych', 'Projektowanie relacyjnych baz danych, SQL, normalizacja, optymalizacja zapytań.', 4, 1, 2025, 2026);
+
+INSERT INTO kursy (organizacja_id, nazwa, opis, ects, semestr, rok_start, rok_koniec) VALUES
+(1, 'Matematyka Dyskretna', 'Logika, zbiory, kombinatoryka, teoria grafów i algorytmy grafowe.', 3, 1, 2025, 2026);
+
+INSERT INTO kursy (organizacja_id, nazwa, opis, ects, semestr, rok_start, rok_koniec) VALUES
+(1, 'Sieci Komputerowe', 'Architektura sieci OSI/TCP-IP, protokoły, bezpieczeństwo sieci.', 4, 2, 2025, 2026);
+
+-- ----------------------------------------
+-- 6. HARMONOGRAMY (opcjonalne)
+-- ----------------------------------------
+
+INSERT INTO harmonogramy (kurs_id, dzien_id, godzina_start, godzina_koniec, numer_sali) VALUES
+(1, 1, '08:00', '10:00', 'Sala 101'),
+(1, 3, '10:15', '12:00', 'Laboratorium L3'),
+(2, 2, '08:00', '10:00', 'Sala 202'),
+(2, 4, '10:15', '12:00', 'Laboratorium L1'),
+(3, 1, '12:15', '14:00', 'Sala 105'),
+(4, 2, '14:15', '16:00', 'Sala 301');
+
+-- ----------------------------------------
+-- 7. ZAPISY (enrollment)
+-- ----------------------------------------
+
+-- Jan Kowalski (teacher) prowadzi Kurs 1 i 2
+-- Anna Nowak (student) zapisana na 1, 2, 3
+-- Piotr Zieliński (student) zapisany na 1 i 2
+
+INSERT INTO zapisy (kurs_id, student_id, status_id)
+SELECT k.id, u.id, s.id FROM kursy k, uzytkownicy u, status_zapisu_slownik s
+WHERE k.nazwa = 'Programowanie Obiektowe' AND u.email = 'anna.nowak@student.umg.edu.pl' AND s.nazwa = 'aktywny';
+
+INSERT INTO zapisy (kurs_id, student_id, status_id)
+SELECT k.id, u.id, s.id FROM kursy k, uzytkownicy u, status_zapisu_slownik s
+WHERE k.nazwa = 'Bazy Danych' AND u.email = 'anna.nowak@student.umg.edu.pl' AND s.nazwa = 'aktywny';
+
+INSERT INTO zapisy (kurs_id, student_id, status_id)
+SELECT k.id, u.id, s.id FROM kursy k, uzytkownicy u, status_zapisu_slownik s
+WHERE k.nazwa = 'Matematyka Dyskretna' AND u.email = 'anna.nowak@student.umg.edu.pl' AND s.nazwa = 'aktywny';
+
+INSERT INTO zapisy (kurs_id, student_id, status_id)
+SELECT k.id, u.id, s.id FROM kursy k, uzytkownicy u, status_zapisu_slownik s
+WHERE k.nazwa = 'Programowanie Obiektowe' AND u.email = 'piotr.zielinski@student.umg.edu.pl' AND s.nazwa = 'aktywny';
+
+INSERT INTO zapisy (kurs_id, student_id, status_id)
+SELECT k.id, u.id, s.id FROM kursy k, uzytkownicy u, status_zapisu_slownik s
+WHERE k.nazwa = 'Bazy Danych' AND u.email = 'piotr.zielinski@student.umg.edu.pl' AND s.nazwa = 'aktywny';
+
+-- ----------------------------------------
+-- 8. MATERIAŁY
+-- ----------------------------------------
+
+INSERT INTO materialy (kurs_id, tytul, sciezka_pliku, typ_pliku_id, rozmiar, mime_type) VALUES
+(1, 'Wykład 1 - Wprowadzenie do OOP', '/materials/projektowanie/w1.pdf', 1, 1024000, 'application/pdf'),
+(1, 'Wykład 2 - Klasy i Obiekty', '/materials/projektowanie/w2.pdf', 1, 2048000, 'application/pdf'),
+(1, 'Wykład 3 - Dziedziczenie', '/materials/projektowanie/w3.pdf', 1, 1536000, 'application/pdf'),
+(1, 'Laboratorium 1 - Zadania', '/materials/projektowanie/lab1.zip', 3, 512000, 'application/zip'),
+(1, 'Laboratorium 2 - Zadania', '/materials/projektowanie/lab2.zip', 3, 768000, 'application/zip'),
+(2, 'SQL - Wprowadzenie', '/materials/bazy/sql_wstep.pdf', 1, 768000, 'application/pdf'),
+(2, 'Normalizacja - Prezentacja', '/materials/bazy/normalizacja.pptx', 1, 1536000, 'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
+(2, 'Ćwiczenia SQL', '/materials/bazy/cwiczenia_sql.zip', 3, 1024000, 'application/zip'),
+(3, 'Logika - Wykład', '/materials/matematyka/logika.pdf', 1, 896000, 'application/pdf'),
+(3, 'Grafy - Teoria', '/materials/matematyka/grafy.pdf', 1, 1280000, 'application/pdf');
+
+-- ----------------------------------------
+-- 9. ZADANIA
+-- ----------------------------------------
+
+INSERT INTO zadania (kurs_id, tytul, opis, typ_zadania_id, max_punkty, termin_oddania, status_id) VALUES
+(1, 'Laboratorium 1', 'Implementacja klasy w C++ z konstruktorami i destruktorami', 2, 10, '2026-02-15 23:59:00', 1),
+(1, 'Projekt grupowy', 'Stworzyć system zarządzania biblioteką', 3, 30, '2026-03-01 23:59:00', 1),
+(2, 'Zadanie z SQL', 'Napisać zapytania SQL do bazy danych sklepu', 1, 15, '2026-02-20 23:59:00', 1),
+(3, 'Sprawdzian z logiki', 'Logika zdaniowa i kwantyfikatory', 2, 20, '2026-02-10 12:00:00', 1);
+
+-- ----------------------------------------
+-- WERYFIKACJA DANYCH
+-- ----------------------------------------
+
+-- SELECT '=== Użytkownicy ===' as info;
+-- SELECT u.id, u.imie, u.nazwisko, u.email, r.nazwa as rola FROM uzytkownicy u LEFT JOIN uzytkownik_role ur ON u.id = ur.user_id LEFT JOIN role r ON ur.role_id = r.id;
+
+-- SELECT '=== Kursy ===' as info;
+-- SELECT id, nazwa, ects, semestr FROM kursy;
+
+-- SELECT '=== Zapisy ===' as info;
+-- SELECT k.nazwa as kurs, u.email as student, s.nazwa as status FROM zapisy z JOIN kursy k ON z.kurs_id = k.id JOIN uzytkownicy u ON z.student_id = u.id JOIN status_zapisu_slownik s ON z.status_id = s.id;

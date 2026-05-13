@@ -1,9 +1,9 @@
 services:
   frontend:
     build: ./frontend
-    container_name: bllias-frontend
+    container_name: bilias-frontend
     ports:
-      - "3000:3000"
+      - '3000:3000'
     # volumes:
     #   - ./frontend:/app
     #   - /app/node_modules
@@ -14,9 +14,9 @@ services:
 
   backend:
     build: ./backend
-    container_name: bllias-backend
+    container_name: bilias-backend
     ports:
-      - "8080:8080"
+      - '8080:8080'
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -29,9 +29,9 @@ services:
 
   db:
     build: ./BD
-    container_name: bllias-db
+    container_name: bilias-db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - db-data:/var/lib/postgresql
     environment:
