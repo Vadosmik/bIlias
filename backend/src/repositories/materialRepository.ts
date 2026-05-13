@@ -15,6 +15,31 @@ export const materialRepository = {
     return result.rows;
   },
 
+  async findByMaterialId(id: number): Promise<Material | null> {
+    const result = await pool.query(
+      'SELECT * FROM materialy WHERE id = $1 AND deleted_at IS NULL',
+      [id]
+    );
+    return result.rows[0] || null;
+  },
+
+  async createMaterial(data: {
+    kursId: number;
+    tytul: string;
+    sciezkaPliku: string;
+    typPlikuId: number;
+    rozmiar: number;
+    mimeType: string;
+  }): Promise<Material> {
+    const result = await pool.query(
+      `INSERT INTO materialy (kurs_id, tytul, sciezka_pliku, typ_pliku_id, rozmiar, mime_type, utworzono, wersja)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), 1)
+       RETURNING *`,
+      [data.kursId, data.tytul, data.sciezkaPliku, data.typPlikuId, data.rozmiar, data.mimeType]
+    );
+    return result.rows[0];
+  },
+
   async getByCourseId(kursId: number): Promise<MaterialDTO[]> {
     const materials = await this.findByKursId(kursId);
     const zadania = await zadanieRepository.findByKursId(kursId);

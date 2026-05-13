@@ -1,5 +1,7 @@
 import { materialRepository, zadanieRepository } from '../repositories/materialRepository.js';
 import type { MaterialItem } from '../model/materialModel.js';
+import fs from 'fs';
+import path from 'path';
 
 const FORMAT_MAP: Record<string, string> = {
   'pdf': 'pdf',
@@ -95,5 +97,45 @@ export class MaterialService {
     }
 
     return rootItems;
+  }
+
+  public async uploadMaterial(params: {
+    kursId: number;
+    title: string;
+    folderName?: string;
+    file: Express.Multer.File;
+  }) {
+    const finalTitle = params.folderName 
+      ? `${params.folderName} - ${params.title}` 
+      : params.title;
+
+    const typPlikuId = 1;
+
+    return await materialRepository.createMaterial({
+      kursId: params.kursId,
+      tytul: finalTitle,
+      sciezkaPliku: params.file.path,
+      typPlikuId: typPlikuId,
+      rozmiar: params.file.size,
+      mimeType: params.file.mimetype
+    });
+  }
+
+  public async getMaterialForDownload(materialId: number) {
+    const material = await materialRepository.findByMaterialId(materialId);
+    
+    if (!material) {
+      throw new Error('Materiał nie istnieje');
+    }
+
+    if (!fs.existsSync(material.sciezka_pliku)) {
+      throw new Error('Plik nie został znaleziony na serwerze');
+    }
+
+    return {
+      path: material.sciezka_pliku,
+      originalName: material.tytul.split(' - ').pop() || material.tytul,
+      mimeType: material.mime_type
+    };
   }
 }
