@@ -4,9 +4,9 @@ services:
     container_name: bilias-frontend
     ports:
       - '3000:3000'
-    # volumes:
-    #   - ./frontend:/app
-    #   - /app/node_modules
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     networks:
       - app-net
     depends_on:

@@ -7,13 +7,23 @@ function getToken(): string | null {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	const token = getToken();
+	const isFormData = options.body instanceof FormData;
+
 	const headers: HeadersInit = {
-		'Content-Type': 'application/json',
+		...(isFormData ? {} : { 'Content-Type': 'application/json' }),
 		...(token ? { Authorization: `Bearer ${token}` } : {}),
 		...options.headers,
 	};
 
 	const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+	
+	// Handle non-JSON responses (like file downloads)
+	const contentType = res.headers.get('content-type');
+	if (contentType && !contentType.includes('application/json')) {
+		if (!res.ok) throw new Error('Request failed');
+		return res as any;
+	}
+
 	const json = await res.json();
 
 	if (!json.success) {
@@ -37,7 +47,7 @@ export interface Course {
 }
 
 export interface Material {
-	id: number;
+	id: string | number;
 	type: 'folder' | 'file' | 'task';
 	name: string;
 	format?: string;
@@ -110,9 +120,181 @@ export const api = {
 			return true;
 		},
 	},
+	tasks: {
+		create: async (
+			courseId: number,
+			data: { title: string; description: string; deadline: string },
+		): Promise<any> => {
+			return request(`/courses/${courseId}/tasks`, {
+				method: 'POST',
+				body: JSON.stringify(data),
+			});
+		},
+		update: async (
+			taskId: string | number,
+			data: { title?: string; description?: string; deadline?: string },
+		): Promise<void> => {
+			const id =
+				typeof taskId === 'string' && taskId.startsWith('t-')
+					? taskId.substring(2)
+					: taskId;
+			await request(`/tasks/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			});
+		},
+		delete: async (taskId: string | number): Promise<void> => {
+			const id =
+				typeof taskId === 'string' && taskId.startsWith('t-')
+					? taskId.substring(2)
+					: taskId;
+			await request(`/tasks/${id}`, {
+				method: 'DELETE',
+			});
+		},
+	},
 	materials: {
 		getByCourseId: async (courseId: number): Promise<Material[]> => {
 			return request<Material[]>(`/courses/${courseId}/materials`);
+		},
+		upload: async (
+			courseId: number,
+			files: File[],
+			folderName?: string,
+		): Promise<Material[]> => {
+			const formData = new FormData();
+			files.forEach(file => {
+				formData.append('files', file);
+			});
+			if (folderName) formData.append('folderName', folderName);
+
+			return request<Material[]>(`/courses/${courseId}/materials`, {
+				method: 'POST',
+				body: formData,
+			});
+		},
+		update: async (
+			materialId: string | number,
+			data: { name?: string; folderName?: string },
+		): Promise<void> => {
+			const id =
+				typeof materialId === 'string' && materialId.startsWith('m-')
+					? materialId.substring(2)
+					: materialId;
+			await request(`/materials/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			});
+		},
+		delete: async (materialId: string | number): Promise<void> => {
+			const id =
+				typeof materialId === 'string' && materialId.startsWith('m-')
+					? materialId.substring(2)
+					: materialId;
+			await request(`/materials/${id}`, {
+				method: 'DELETE',
+			});
+		},
+		renameFolder: async (
+			courseId: number,
+			oldName: string,
+			newName: string,
+		): Promise<void> => {
+			await request(`/courses/${courseId}/folders`, {
+				method: 'PATCH',
+				body: JSON.stringify({ oldName, newName }),
+			});
+		},
+		deleteFolder: async (
+			courseId: number,
+			folderName: string,
+		): Promise<void> => {
+			await request(
+				`/courses/${courseId}/folders?folderName=${encodeURIComponent(folderName)}`,
+				{
+					method: 'DELETE',
+				},
+			);
+		},
+		download: async (materialId: string | number): Promise<void> => {
+			// Stripping 'm-' prefix if present from string IDs
+			const id = typeof materialId === 'string' && materialId.startsWith('m-') 
+				? materialId.substring(2) 
+				: materialId;
+
+			const response = await request<Response>(`/materials/${id}/download`);
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			
+			// Try to get filename from content-disposition
+			const contentDisposition = response.headers.get('content-disposition');
+			let filename = 'download';
+			if (contentDisposition && contentDisposition.indexOf('filename=') !== -1) {
+				filename = contentDisposition.split('filename=')[1].replace(/["']/g, '');
+			}
+			
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+			document.body.removeChild(a);
+		},
+		downloadSubmissionZip: async (submissionId: number, studentName: string): Promise<void> => {
+			const response = await request<Response>(`/submissions/${submissionId}/download-zip`);
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			
+			// Format name: Jan Kowalski -> Jan_Kowalski.zip
+			const formattedName = studentName.replace(/\s+/g, '_');
+			a.download = `${formattedName}.zip`;
+			
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+			document.body.removeChild(a);
+		},
+	},
+	submissions: {
+		submitTask: async (
+			taskId: string | number,
+			studentId: number,
+			files: File[],
+		): Promise<any> => {
+			const id = typeof taskId === 'string' && taskId.startsWith('t-') 
+				? taskId.substring(2) 
+				: taskId;
+
+			const formData = new FormData();
+			files.forEach(file => {
+				formData.append('files', file);
+			});
+			formData.append('studentId', studentId.toString());
+
+			return request(`/submissions/${id}/submit`, {
+				method: 'POST',
+				body: formData,
+			});
+		},
+		deleteFile: async (fileId: number): Promise<void> => {
+			await request(`/submissions/files/${fileId}`, {
+				method: 'DELETE',
+			});
+		},
+		getTaskSubmissions: async (taskId: string | number, studentId: number): Promise<any> => {
+			const id = typeof taskId === 'string' && taskId.startsWith('t-') 
+				? taskId.substring(2) 
+				: taskId;
+			return request(`/submissions/${id}/my-files?studentId=${studentId}`);
+		},
+		getAllTaskSubmissions: async (taskId: string | number): Promise<any[]> => {
+			const id = typeof taskId === 'string' && taskId.startsWith('t-') 
+				? taskId.substring(2) 
+				: taskId;
+			return request<any[]>(`/submissions/task/${id}`);
 		},
 	},
 };

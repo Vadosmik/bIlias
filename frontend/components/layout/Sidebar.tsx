@@ -26,11 +26,11 @@ const menuItems = [
 		icon: BookOpen,
 		href: '/courses',
 	},
-	{
-		title: 'Ustawienia',
-		icon: Settings,
-		href: '/settings',
-	},
+	// {
+	// 	title: 'Ustawienia',
+	// 	icon: Settings,
+	// 	href: '/settings',
+	// },
 ];
 
 export function Sidebar() {

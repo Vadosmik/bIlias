@@ -179,9 +179,9 @@ CREATE TABLE przeslanie_wersje (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     przeslanie_id INT REFERENCES przeslania(id) ON DELETE CASCADE,
     sciezka_pliku TEXT NOT NULL,
+    oryginalna_nazwa VARCHAR(255),
     wersja INT NOT NULL,
-    utworzono TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE (przeslanie_id, wersja)
+    utworzono TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =========================
