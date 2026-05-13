@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Search, Filter, PlusCircle, CheckCircle2, User, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api, Course } from '@/lib/api';
+import Link from 'next/link';
 
 const departments = [
   'Wszystkie Wydziały',
@@ -126,7 +127,13 @@ export default function CoursesPage() {
                 <td className="px-6 py-5">
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-brand-sand">{course.code}</span>
-                    <span className="font-bold text-brand-navy group-hover:text-brand-sand transition-colors">{course.name}</span>
+                    {course.joined ? (
+                      <Link href={`/courses/${course.id}`} className="font-bold text-brand-navy hover:text-brand-sand transition-colors">
+                        {course.name}
+                      </Link>
+                    ) : (
+                      <span className="font-bold text-brand-navy">{course.name}</span>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-5 text-sm text-muted-foreground hidden lg:table-cell">
