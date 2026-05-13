@@ -1,11 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
 export type UserRole = 'student' | 'teacher' | 'admin';
 
 interface User {
-	id: string;
+	id: number;
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -28,25 +29,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		// Mock check for session
-		const mockUser: User = {
-			id: '1',
-			firstName: 'Jan',
-			lastName: 'Kowalski',
-			email: 'jan.kowalski@student.umg.edu.pl',
-			// role: 'teacher',
-			role: 'student',
-			department: 'Wydział Elektryczny',
-			semester: 6,
-		};
-
-		setUser(mockUser);
+		const stored = localStorage.getItem('user');
+		if (stored) {
+			try {
+				const parsed = JSON.parse(stored);
+				setUser({
+					...parsed,
+					firstName: parsed.imie,
+					lastName: parsed.nazwisko,
+				});
+			} catch {
+				localStorage.removeItem('user');
+				localStorage.removeItem('token');
+			}
+		}
 		setIsLoading(false);
 	}, []);
 
 	const login = (email: string, role: UserRole) => {
+		const stored = localStorage.getItem('user');
+		if (stored) {
+			try {
+				const parsed = JSON.parse(stored);
+				setUser({
+					...parsed,
+					firstName: parsed.imie,
+					lastName: parsed.nazwisko,
+				});
+				return;
+			} catch {}
+		}
 		setUser({
-			id: '1',
+			id: 0,
 			firstName: role === 'teacher' ? 'Dr inż. Adam' : 'Jan',
 			lastName: role === 'teacher' ? 'Nowak' : 'Kowalski',
 			email,
@@ -57,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	const logout = () => {
+		api.auth.logout();
 		setUser(null);
 	};
 

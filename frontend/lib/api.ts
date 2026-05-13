@@ -47,14 +47,6 @@ export interface Material {
 	children?: Material[];
 }
 
-const mockCourses: Course[] = [
-  { id: '1', name: 'Bazy Danych', code: 'BD-2024', department: 'Wydział Elektryczny', semester: 6, lecturers: ['Dr inż. Tomasz Papierowski'], joined: true, progress: 75 },
-  { id: '2', name: 'Programowanie Obiektowe', code: 'PO-2024', department: 'Wydział Elektryczny', semester: 6, lecturers: ['Mgr inż. Kacper Szamszon'], joined: true, progress: 40 },
-  { id: '3', name: 'Sieci Komputerowe', code: 'SK-2024', department: 'Wydział Elektryczny', semester: 6, lecturers: ['Dr Sofiia Stankevych'], joined: true, progress: 90 },
-  { id: '4', name: 'Systemy Operacyjne', code: 'SO-2024', department: 'Wydział Elektryczny', semester: 5, lecturers: ['Dr inż. Vadzim Mikanovich'], joined: false },
-  { id: '5', name: 'Matematyka Dyskretna', code: 'MD-2023', department: 'Wydział Elektryczny', semester: 1, lecturers: ['Mgr Monika Szczepańska'], joined: false },
-];
-
 export const api = {
 	auth: {
 		login: async (email: string, password: string) => {

@@ -24,20 +24,21 @@ export default function CoursesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState(user?.department || departments[0]);
   const [selectedSem, setSelectedSem] = useState(user?.semester?.toString() || semesters[0]);
-  const [joiningId, setJoiningId] = useState<string | null>(null);
+  const [joiningId, setJoiningId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const data = await api.courses.getAll();
+      const data = await api.courses.getAll(user?.id);
       setCourses(data);
       setIsLoading(false);
     };
     fetchCourses();
-  }, []);
+  }, [user?.id]);
 
-  const handleJoin = async (id: string) => {
+  const handleJoin = async (id: number) => {
+    if (!user) return;
     setJoiningId(id);
-    const success = await api.courses.join(id);
+    const success = await api.courses.join(id, user.id);
     if (success) {
       setCourses(prev => prev.map(c => c.id === id ? { ...c, joined: true } : c));
     }

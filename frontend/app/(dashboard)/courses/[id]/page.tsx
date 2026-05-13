@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
 	Folder,
@@ -22,21 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Modal } from '@/components/ui/Modal';
-
-// Mock materials and folders
-const initialMaterials = [
-  { id: 'f1', type: 'folder', name: 'Laboratorium 1 - Wprowadzenie', children: [
-    { id: 'm1', type: 'file', name: 'Instrukcja_Lab1.pdf', format: 'pdf', size: '1.2 MB' },
-    { id: 'm2', type: 'file', name: 'schemat_bazy.sql', format: 'sql', size: '15 KB' },
-    { id: 'm3', type: 'file', name: 'setup.sh', format: 'sh', size: '2 KB' },
-  ]},
-  { id: 'f2', type: 'folder', name: 'Wykłady', children: [
-    { id: 'm4', type: 'file', name: 'Wyklad_1_Architektura.pdf', format: 'pdf', size: '5.4 MB' },
-    { id: 'm5', type: 'file', name: 'Wyklad_2_Normalizacja.pdf', format: 'pdf', size: '4.1 MB' },
-  ]},
-  { id: 'm6', type: 'file', name: 'Sylabus_Przedmiotu.pdf', format: 'pdf', size: '0.8 MB' },
-  { id: 't1', type: 'task', name: 'Zadanie Domowe 1 - Projekt E-R', deadline: '2024-05-20', description: 'Należy przygotować diagram encji dla systemu bibliotecznego uwzględniając wypożyczenia i rezerwacje.' },
-];
+import { api, Course, Material } from '@/lib/api';
 
 export default function CourseDetailsPage() {
 	const { id } = useParams();
