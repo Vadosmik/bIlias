@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
 import { AuthShell } from "@/components/AuthShell";
-import { mockApi } from "@/lib/mockApi";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,40 +19,19 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-
     if (!emailRegex.test(email)) {
       setError("Wprowadź poprawny adres e-mail (np. imie.nazwisko@umg.edu.pl)");
-      return;
-    }
-
-    if (!passwordRegex.test(password)) {
-      setError("Hasło musi mieć co najmniej 8 znaków, wielką literę i cyfrę");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || "Błędny e-mail lub hasło");
-      }
-
-      console.log("Zalogowano przez API:", result.data);
-      router.push("/");
+      const user = await api.auth.login(email, password);
+      login(email, user.role);
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Błąd połączenia z serwerem");
     } finally {
