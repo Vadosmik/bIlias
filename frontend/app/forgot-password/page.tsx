@@ -7,6 +7,7 @@ import { AuthShell } from "@/components/AuthShell";
 import { mockApi } from "@/lib/mockApi";
 
 export default function ForgotPasswordPage() {
+  /*
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,11 +26,13 @@ export default function ForgotPasswordPage() {
       setLoading(false);
     }
   }
+  */
 
   return (
     <AuthShell
       title="Reset hasła"
-      subtitle="Podaj swój uczelniany e-mail, a wyślemy link do ustawienia nowego hasła."
+      // subtitle="Podaj swój uczelniany e-mail, a wyślemy link do ustawienia nowego hasła."
+      subtitle="Odzwyskiwanie dostępu do konta."
       footer={
         <span className="text-muted-foreground">
           Pamiętasz hasło?{" "}
@@ -39,6 +42,13 @@ export default function ForgotPasswordPage() {
         </span>
       }
     >
+      <div className="py-4 text-center">
+        <p className="text-sm text-foreground">
+          Skontaktuj się z <strong className="text-primary">admin@umg.edu.pl</strong>
+        </p>
+      </div>
+
+      {/*
       {sent ? (
         <div className="rounded-lg border border-primary/30 bg-primary/5 p-5 text-sm">
           <CheckCircle2 className="h-6 w-6 text-primary" />
@@ -49,6 +59,7 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
       ) : (
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-foreground">E-mail uczelniany</span>
@@ -85,6 +96,7 @@ export default function ForgotPasswordPage() {
           </button>
         </form>
       )}
+        */}
     </AuthShell>
   );
 }

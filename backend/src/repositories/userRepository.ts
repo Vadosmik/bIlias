@@ -12,12 +12,17 @@ export interface User {
   utworzono: Date;
 }
 
+export interface UserRole {
+  role: string;
+}
+
 export interface CreateUserInput {
   email: string;
   password: string;
   imie: string;
   nazwisko: string;
   organizacja_id?: number;
+  role?: string;
 }
 
 export const userRepository = {
@@ -54,5 +59,16 @@ export const userRepository = {
 
   async verifyPassword(user: User, password: string): Promise<boolean> {
     return bcrypt.compare(password, user.hash_hasla);
+  },
+
+  async getUserRoles(userId: number): Promise<{ role: string }[]> {
+    const result = await pool.query(
+      `SELECT r.nazwa as role
+       FROM uzytkownik_role ur
+       JOIN role r ON ur.role_id = r.id
+       WHERE ur.user_id = $1`,
+      [userId]
+    );
+    return result.rows;
   },
 };

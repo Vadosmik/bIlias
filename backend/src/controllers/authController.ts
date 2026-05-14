@@ -32,6 +32,7 @@ export class AuthController {
         password: String(req.body?.password ?? ''),
         imie: String(req.body?.imie ?? ''),
         nazwisko: String(req.body?.nazwisko ?? ''),
+        role: String(req.body?.role ?? ''),
       });
 
       res.status(201).json({
