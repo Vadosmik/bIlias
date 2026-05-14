@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+import pool from '../db/index.js';
 import { userRepository, type CreateUserInput } from '../repositories/userRepository.js';
 
 const registerSchema = z.object({
@@ -47,10 +48,22 @@ export class AuthService {
       throw new Error('Niepoprawne dane rejestracji: ' + parsed.error.errors.map(e => e.message).join(', '));
     }
 
+    const { email, role } = parsed.data;
+
+    if ((role === 'wykladowca' || role === 'teacher') && !email.endsWith('@umg.edu.pl')) {
+      throw new Error('Wykładowca musi posiadać adres w domenie @umg.edu.pl');
+    }
+
+    if ((role === 'student') && !email.endsWith('@student.umg.edu.pl')) {
+      throw new Error('Student musi posiadać adres w domenie @student.umg.edu.pl');
+    }
+
     const existingUser = await userRepository.findByEmail(parsed.data.email);
     if (existingUser) {
       throw new Error('Uzytkownik o tym adresie email juz istnieje');
     }
+
+    const normalizedRole = (role === 'wykladowca') ? 'teacher' : (role || 'student');
 
     const createInput: CreateUserInput = {
       email: parsed.data.email,
@@ -61,6 +74,24 @@ export class AuthService {
     };
 
     const user = await userRepository.create(createInput);
+
+    console.log('Register - created user:', user.id, 'role input:', parsed.data.role);
+
+    if (parsed.data.role) {
+      const roleQuery = await pool.query('SELECT id FROM role WHERE nazwa = $1', [parsed.data.role]);
+      console.log('Role query result:', roleQuery.rows);
+      if (roleQuery.rows.length > 0) {
+        const insertResult = await pool.query(
+          'INSERT INTO uzytkownik_role (user_id, role_id) VALUES ($1, $2)',
+          [user.id, roleQuery.rows[0].id]
+        );
+        console.log('Insert result:', insertResult.rows);
+      }
+    }
+
+    const userRoles = await userRepository.getUserRoles(user.id);
+    console.log('User roles:', userRoles);
+    const userRole = userRoles[0]?.role || normalizedRole || 'student';
 
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
@@ -107,6 +138,9 @@ export class AuthService {
     if (!user.aktywny) {
       throw new Error('Konto jest nieaktywne');
     }
+
+    const userRoles = await userRepository.getUserRoles(user.id);
+    const userRole = userRoles[0]?.role || 'student';
 
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
