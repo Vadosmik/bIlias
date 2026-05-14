@@ -37,7 +37,6 @@ export interface AuthResult {
     imie: string;
     nazwisko: string;
     role: string;
-    organizacja_id: number | null;
   };
 }
 
@@ -71,7 +70,7 @@ export class AuthService {
       password: parsed.data.password,
       imie: parsed.data.imie,
       nazwisko: parsed.data.nazwisko,
-      role: normalizedRole,
+      role: parsed.data.role,
     };
 
     const user = await userRepository.create(createInput);
@@ -112,7 +111,7 @@ export class AuthService {
         email: user.email,
         imie: user.imie,
         nazwisko: user.nazwisko,
-        role: 'student',
+        role: parsed.data.role || 'student',
       },
     };
   }

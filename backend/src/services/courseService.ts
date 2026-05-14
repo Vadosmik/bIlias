@@ -27,4 +27,13 @@ export class CourseService {
 
     await courseRepository.enroll(courseId, userId);
   }
+
+  public async leaveCourse(courseId: number, userId: number): Promise<void> {
+    const isEnrolled = await courseRepository.isEnrolled(courseId, userId);
+    if (!isEnrolled) {
+      throw new Error('Nie jesteś zapisany na ten kurs');
+    }
+
+    await courseRepository.unenroll(courseId, userId);
+  }
 }

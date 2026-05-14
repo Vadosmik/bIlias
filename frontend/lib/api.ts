@@ -114,6 +114,13 @@ export const api = {
 			});
 			return true;
 		},
+		leave: async (courseId: number, userId: number): Promise<boolean> => {
+			await request(`/courses/${courseId}/leave`, {
+				method: 'POST',
+				body: JSON.stringify({ userId }),
+			});
+			return true;
+		},
 	},
 	tasks: {
 		create: async (

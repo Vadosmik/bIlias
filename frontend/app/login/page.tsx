@@ -20,7 +20,7 @@ export default function LoginPage() {
 		e.preventDefault();
 		setError(null);
 
-		const emailRegex = /^[a-zA-Z0-9.]+@[a-zA-Z.]*umg\.edu\.pl$/;
+		const emailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)*umg\.edu\.pl$/;
 		console.log(!emailRegex.test(email));
 		if (!emailRegex.test(email)) {
 			setError('Wprowadź poprawny adres e-mail (np. twoj.mail@umg.edu.pl)');
