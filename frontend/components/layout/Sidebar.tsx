@@ -17,7 +17,7 @@ import Image from 'next/image';
 
 const menuItems = [
 	{
-		title: 'Panel',
+		title: 'Panel Główny',
 		icon: LayoutDashboard,
 		href: '/dashboard',
 	},
@@ -26,11 +26,11 @@ const menuItems = [
 		icon: BookOpen,
 		href: '/courses',
 	},
-	{
-		title: 'Ustawienia',
-		icon: Settings,
-		href: '/settings',
-	},
+	// {
+	// 	title: 'Ustawienia',
+	// 	icon: Settings,
+	// 	href: '/settings',
+	// },
 ];
 
 export function Sidebar() {

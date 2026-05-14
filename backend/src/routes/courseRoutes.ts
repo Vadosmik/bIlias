@@ -9,7 +9,7 @@ courseRoutes.get('/', (req: Request, res: Response) => {
 });
 
 courseRoutes.get('/my', (req: Request, res: Response) => {
-  courseController.getMyCourses(req, res);
+  courseController.getMy(req, res);
 });
 
 courseRoutes.get('/:id', (req: Request, res: Response) => {

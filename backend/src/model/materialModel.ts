@@ -1,6 +1,15 @@
+export interface Folder {
+  id: number;
+  kurs_id: number;
+  parent_id: number | null;
+  nazwa: string;
+  utworzono: Date;
+}
+
 export interface Material {
   id: number;
   kurs_id: number;
+  folder_id: number | null;
   tytul: string;
   sciezka_pliku: string;
   typ_pliku_id: number | null;
@@ -19,6 +28,7 @@ export interface TypPliku {
 export interface Zadanie {
   id: number;
   kurs_id: number;
+  folder_id: number | null;
   tytul: string;
   opis: string | null;
   typ_zadania_id: number | null;
@@ -32,6 +42,7 @@ export interface MaterialItem {
   id: string;
   type: 'folder' | 'file' | 'task';
   name: string;
+  dbId?: number; // Backend database ID
   format?: string;
   size?: string;
   deadline?: string;

@@ -9,12 +9,4 @@ export interface Course {
   rok_start: number;
   rok_koniec: number;
   utworzono: Date;
-  zdjecie_w_tle?: string;
-}
-
-export interface CourseEnrollment {
-  kurs_id: number;
-  student_id: number;
-  status_id: number;
-  zapisano: Date;
 }
