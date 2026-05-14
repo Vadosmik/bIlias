@@ -7,6 +7,7 @@ const registerSchema = z.object({
   password: z.string().min(6),
   imie: z.string().min(1),
   nazwisko: z.string().min(1),
+  role: z.string().optional(),
 });
 
 const loginSchema = z.object({
@@ -19,6 +20,7 @@ export interface RegisterInput {
   password: string;
   imie: string;
   nazwisko: string;
+  role?: string;
 }
 
 export interface LoginInput {
@@ -33,6 +35,7 @@ export interface AuthResult {
     email: string;
     imie: string;
     nazwisko: string;
+    role: string;
   };
 }
 
@@ -54,6 +57,7 @@ export class AuthService {
       password: parsed.data.password,
       imie: parsed.data.imie,
       nazwisko: parsed.data.nazwisko,
+      role: parsed.data.role,
     };
 
     const user = await userRepository.create(createInput);
@@ -76,7 +80,7 @@ export class AuthService {
         email: user.email,
         imie: user.imie,
         nazwisko: user.nazwisko,
-        role: 'student',
+        role: parsed.data.role || 'student',
       },
     };
   }

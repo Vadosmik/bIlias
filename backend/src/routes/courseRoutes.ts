@@ -20,4 +20,8 @@ courseRoutes.post('/:id/join', (req: Request, res: Response) => {
   courseController.join(req, res);
 });
 
+courseRoutes.post('/:id/leave', (req: Request, res: Response) => {
+  courseController.leave(req, res);
+});
+
 export { courseRoutes };

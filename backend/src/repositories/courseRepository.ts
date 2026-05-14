@@ -145,5 +145,12 @@ export const courseRepository = {
       'INSERT INTO public.zapisy (kurs_id, student_id, status_id) VALUES ($1, $2, 1) ON CONFLICT DO NOTHING',
       [courseId, userId]
     );
+  },
+
+  async unenroll(courseId: number, userId: number): Promise<void> {
+    await pool.query(
+      'DELETE FROM public.zapisy WHERE kurs_id = $1 AND student_id = $2',
+      [courseId, userId]
+    );
   }
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
 	Folder,
@@ -20,6 +20,9 @@ import {
 	Loader2,
 	Cloud,
 	CheckCircle,
+	ChevronDown,
+	ChevronRight,
+	LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Modal } from '@/components/ui/Modal';
@@ -27,6 +30,7 @@ import { api, Course, Material } from '@/lib/api';
 
 export default function CourseDetailsPage() {
 	const { id } = useParams();
+	const router = useRouter();
 	const { user } = useAuth();
 	const [course, setCourse] = useState<Course | null>(null);
 	const [materials, setMaterials] = useState<Material[]>([]);
@@ -194,6 +198,27 @@ export default function CourseDetailsPage() {
 		} catch (err) {
 			console.error('Folder creation failed:', err);
 			alert('Błąd podczas tworzenia folderu');
+		} finally {
+			setIsActionLoading(false);
+		}
+	};
+
+	const handleLeaveCourse = async () => {
+		if (!id || !user?.id) return;
+		if (
+			!confirm(
+				'Czy na pewno chcesz opuścić ten kurs? Stracisz dostęp do wszystkich materiałów i zadań.',
+			)
+		)
+			return;
+
+		setIsActionLoading(true);
+		try {
+			await api.courses.leave(Number(id), user.id);
+			router.push('/courses'); // Redirect to course catalog
+		} catch (err) {
+			console.error('Failed to leave course:', err);
+			alert('Błąd podczas opuszczania kursu');
 		} finally {
 			setIsActionLoading(false);
 		}
@@ -372,15 +397,15 @@ export default function CourseDetailsPage() {
 			if (!id) return;
 			try {
 				const data = await api.courses.getById(Number(id));
-				
+
 				if (abortController.signal.aborted) return;
 
 				if (data) {
 					setCourse(data);
 					const mats = await api.materials.getByCourseId(Number(id));
-					
+
 					if (abortController.signal.aborted) return;
-					
+
 					setMaterials(mats);
 					const folderIds = mats
 						.filter(m => m.type === 'folder')
@@ -480,9 +505,19 @@ export default function CourseDetailsPage() {
 						</span>
 					</div>
 					<h1 className='text-3xl font-bold text-brand-navy'>{course.name}</h1>
-					<p className='text-muted-foreground mt-1'>
-						{course.lecturers[0] ? `Prowadzący: ${course.lecturers[0]}` : ''}
-					</p>
+					<div className='flex items-center gap-4 mt-1'>
+						<p className='text-muted-foreground'>
+							{course.lecturers[0] ? `Prowadzący: ${course.lecturers[0]}` : ''}
+						</p>
+						{!isLecturer && (
+							<button
+								onClick={handleLeaveCourse}
+								className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1.5'>
+								<LogOut className='w-3 h-3' />
+								Opuść kurs
+							</button>
+						)}
+					</div>
 					{course.description && (
 						<p className='text-sm text-muted-foreground mt-2 max-w-2xl'>
 							{course.description}
@@ -552,15 +587,26 @@ export default function CourseDetailsPage() {
 											{renderIcon(item)}
 										</div>
 										<div className='min-w-0'>
-											<p
-												className={cn(
-													'font-bold text-brand-navy truncate group-hover:text-brand-sand transition-colors',
-													item.type === 'task' &&
-														isDeadlinePassed(item.deadline) &&
-														'text-gray-400',
-												)}>
-												{item.name}
-											</p>
+											<div className='flex items-center gap-2'>
+												<p
+													className={cn(
+														'font-bold text-brand-navy truncate group-hover:text-brand-sand transition-colors',
+														item.type === 'task' &&
+															isDeadlinePassed(item.deadline) &&
+															'text-gray-400',
+													)}>
+													{item.name}
+												</p>
+												{item.type === 'folder' && (
+													<div className='text-brand-navy/30'>
+														{openFolders.includes(item.id) ? (
+															<ChevronDown className='w-4 h-4' />
+														) : (
+															<ChevronRight className='w-4 h-4' />
+														)}
+													</div>
+												)}
+											</div>
 											{item.type === 'file' && item.format && (
 												<p className='text-[10px] text-muted-foreground uppercase font-bold tracking-tighter'>
 													{item.format} • {item.size}
@@ -634,9 +680,20 @@ export default function CourseDetailsPage() {
 														<div className='flex items-center gap-3 flex-1 min-w-0'>
 															{renderIcon(child)}
 															<div>
-																<p className='text-sm font-semibold text-brand-navy truncate group-hover:text-brand-sand transition-colors'>
-																	{child.name}
-																</p>
+																<div className='flex items-center gap-2'>
+																	<p className='text-sm font-semibold text-brand-navy truncate group-hover:text-brand-sand transition-colors'>
+																		{child.name}
+																	</p>
+																	{child.type === 'folder' && (
+																		<div className='text-brand-navy/30'>
+																			{openFolders.includes(child.id) ? (
+																				<ChevronDown className='w-3.5 h-3.5' />
+																			) : (
+																				<ChevronRight className='w-3.5 h-3.5' />
+																			)}
+																		</div>
+																	)}
+																</div>
 																{child.type === 'file' && (
 																	<p className='text-[10px] text-muted-foreground uppercase font-bold tracking-tighter'>
 																		{child.format} • {child.size}

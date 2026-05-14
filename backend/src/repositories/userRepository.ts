@@ -18,6 +18,7 @@ export interface CreateUserInput {
   imie: string;
   nazwisko: string;
   organizacja_id?: number;
+  role?: string;
 }
 
 export const userRepository = {
@@ -49,7 +50,17 @@ export const userRepository = {
        RETURNING *`,
       [input.email, hash, input.imie, input.nazwisko, input.organizacja_id || null]
     );
-    return result.rows[0];
+    const user = result.rows[0];
+    
+    // Assign role if provided, default to 'student'
+    const roleName = input.role || 'student';
+    await pool.query(
+      `INSERT INTO uzytkownik_role (user_id, role_id)
+       SELECT $1, id FROM role WHERE nazwa = $2`,
+      [user.id, roleName]
+    );
+    
+    return user;
   },
 
   async verifyPassword(user: User, password: string): Promise<boolean> {

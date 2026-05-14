@@ -91,4 +91,27 @@ export class CourseController {
       });
     }
   }
+
+  public async leave(req: Request, res: Response): Promise<void> {
+    try {
+      const courseId = Number(req.params.id);
+      const userId = Number(req.body.userId);
+
+      if (!courseId || !userId) {
+        res.status(400).json({ success: false, error: 'Brakujące dane wypisu' });
+        return;
+      }
+
+      await courseService.leaveCourse(courseId, userId);
+      res.status(200).json({
+        success: true,
+        message: 'Zostałeś wypisany z kursu',
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Błąd podczas wypisywania z kursu',
+      });
+    }
+  }
 }
