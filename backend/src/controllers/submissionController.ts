@@ -85,7 +85,7 @@ export class SubmissionController {
     }
   }
 
-  public async downloadZip(req: Request, res: Response): Promise<void> {
+  public async deleteFile(req: Request, res: Response): Promise<void> {
     try {
       const fileId = Number(req.params.fileId);
       await submissionService.deleteFile(fileId);

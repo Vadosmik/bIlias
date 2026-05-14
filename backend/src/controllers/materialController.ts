@@ -31,7 +31,7 @@ export class MaterialController {
   public async upload(req: Request, res: Response): Promise<void> {
     try {
       const kursId = Number(req.params.kursId);
-      const { folderName } = req.body;
+      const { folderId } = req.body;
       const files = req.files as Express.Multer.File[];
 
       if (!files || files.length === 0 || !kursId) {
@@ -44,7 +44,7 @@ export class MaterialController {
           materialService.uploadMaterial({
             kursId,
             title: file.originalname,
-            folderName,
+            folderId: folderId ? Number(folderId) : undefined,
             file
           })
         )
@@ -64,7 +64,7 @@ export class MaterialController {
   public async createTask(req: Request, res: Response): Promise<void> {
     try {
       const kursId = Number(req.params.kursId);
-      const { title, description, deadline } = req.body;
+      const { title, description, deadline, folderId } = req.body;
 
       if (!kursId || !title || !deadline) {
         res.status(400).json({ success: false, error: 'Brakujące dane zadania' });
@@ -75,7 +75,8 @@ export class MaterialController {
         kursId,
         title,
         description,
-        deadline
+        deadline,
+        folderId: folderId ? Number(folderId) : undefined
       });
 
       res.status(201).json({
@@ -86,6 +87,33 @@ export class MaterialController {
     } catch (error) {
       console.error('Create task error:', error);
       res.status(500).json({ success: false, error: 'Błąd podczas tworzenia zadania' });
+    }
+  }
+
+  public async createFolder(req: Request, res: Response): Promise<void> {
+    try {
+      const kursId = Number(req.params.kursId);
+      const { nazwa, parentId } = req.body;
+
+      if (!kursId || !nazwa) {
+        res.status(400).json({ success: false, error: 'Brakujące dane folderu' });
+        return;
+      }
+
+      const newFolder = await materialService.createFolder({
+        kursId,
+        nazwa,
+        parentId: parentId ? Number(parentId) : undefined
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Folder został utworzony',
+        data: newFolder
+      });
+    } catch (error) {
+      console.error('Create folder error:', error);
+      res.status(500).json({ success: false, error: 'Błąd podczas tworzenia folderu' });
     }
   }
 
@@ -104,9 +132,12 @@ export class MaterialController {
   public async updateMaterial(req: Request, res: Response): Promise<void> {
     try {
       const id = Number(req.params.id);
-      const { name, folderName } = req.body;
+      const { name, folderId } = req.body;
 
-      await materialService.updateMaterial(id, { name, folderName });
+      await materialService.updateMaterial(id, { 
+        name, 
+        folderId: folderId !== undefined ? (folderId ? Number(folderId) : null) : undefined 
+      });
 
       res.status(200).json({ success: true, message: 'Materiał został zaktualizowany' });
     } catch (error) {
@@ -127,9 +158,14 @@ export class MaterialController {
   public async updateTask(req: Request, res: Response): Promise<void> {
     try {
       const id = Number(req.params.id);
-      const { title, description, deadline, folderName } = req.body;
+      const { title, description, deadline, folderId } = req.body;
 
-      await materialService.updateTask(id, { title, description, deadline, folderName });
+      await materialService.updateTask(id, { 
+        title, 
+        description, 
+        deadline, 
+        folderId: folderId !== undefined ? (folderId ? Number(folderId) : null) : undefined 
+      });
 
       res.status(200).json({ success: true, message: 'Zadanie zostało zaktualizowane' });
     } catch (error) {
@@ -147,17 +183,17 @@ export class MaterialController {
     }
   }
 
-  public async renameFolder(req: Request, res: Response): Promise<void> {
+  public async updateFolder(req: Request, res: Response): Promise<void> {
     try {
-      const kursId = Number(req.params.kursId);
-      const { oldName, newName } = req.body;
+      const id = Number(req.params.id);
+      const { nazwa } = req.body;
 
-      if (!kursId || !oldName || !newName) {
+      if (!id || !nazwa) {
         res.status(400).json({ success: false, error: 'Brakujące dane folderu' });
         return;
       }
 
-      await materialService.renameFolder(kursId, oldName, newName);
+      await materialService.renameFolder(id, nazwa);
 
       res.status(200).json({ success: true, message: 'Folder został przemianowany' });
     } catch (error) {
@@ -167,16 +203,14 @@ export class MaterialController {
 
   public async deleteFolder(req: Request, res: Response): Promise<void> {
     try {
-      const kursId = Number(req.params.kursId);
-      const folderName = (req.body.folderName || req.query.folderName) as string;
-
-      if (!kursId || !folderName) {
-        console.error('Missing folder delete data:', { kursId, folderName });
-        res.status(400).json({ success: false, error: 'Brakujące dane folderu' });
+      const id = Number(req.params.id);
+      
+      if (!id) {
+        res.status(400).json({ success: false, error: 'Brakujące ID folderu' });
         return;
       }
 
-      await materialService.deleteFolder(kursId, folderName);
+      await materialService.deleteFolder(id);
 
       res.status(200).json({ success: true, message: 'Folder został usunięty' });
     } catch (error) {

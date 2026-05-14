@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
 	Folder,
@@ -18,27 +18,12 @@ import {
 	Move,
 	AlertCircle,
 	Loader2,
-	Users,
 	Cloud,
 	CheckCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Modal } from '@/components/ui/Modal';
-
-// Mock materials and folders
-const initialMaterials = [
-  { id: 'f1', type: 'folder', name: 'Laboratorium 1 - Wprowadzenie', children: [
-    { id: 'm1', type: 'file', name: 'Instrukcja_Lab1.pdf', format: 'pdf', size: '1.2 MB' },
-    { id: 'm2', type: 'file', name: 'schemat_bazy.sql', format: 'sql', size: '15 KB' },
-    { id: 'm3', type: 'file', name: 'setup.sh', format: 'sh', size: '2 KB' },
-  ]},
-  { id: 'f2', type: 'folder', name: 'Wykłady', children: [
-    { id: 'm4', type: 'file', name: 'Wyklad_1_Architektura.pdf', format: 'pdf', size: '5.4 MB' },
-    { id: 'm5', type: 'file', name: 'Wyklad_2_Normalizacja.pdf', format: 'pdf', size: '4.1 MB' },
-  ]},
-  { id: 'm6', type: 'file', name: 'Sylabus_Przedmiotu.pdf', format: 'pdf', size: '0.8 MB' },
-  { id: 't1', type: 'task', name: 'Zadanie Domowe 1 - Projekt E-R', deadline: '2024-05-20', description: 'Należy przygotować diagram encji dla systemu bibliotecznego uwzględniając wypożyczenia i rezerwacje.' },
-];
+import { api, Course, Material } from '@/lib/api';
 
 export default function CourseDetailsPage() {
 	const { id } = useParams();
@@ -62,7 +47,9 @@ export default function CourseDetailsPage() {
 		description: '',
 		deadline: '',
 	});
-	const [serverFiles, setServerFiles] = useState<{ name: string; path: string }[]>([]);
+	const [serverFiles, setServerFiles] = useState<
+		{ name: string; path: string }[]
+	>([]);
 	const [submissions, setSubmissions] = useState<any[]>([]);
 	const [isSubmissionsLoading, setIsSubmissionsLoading] = useState(false);
 	const [taskForSubmissions, setTaskForSubmissions] = useState<Material | null>(
@@ -72,12 +59,21 @@ export default function CourseDetailsPage() {
 		name: '',
 		description: '',
 		deadline: '',
-		folderName: '',
 	});
 	const [isActionLoading, setIsActionLoading] = useState(false);
-	const [managementStep, setManagementStep] = useState<'menu' | 'rename' | 'move' | 'task-edit'>('menu');
+	const [managementStep, setManagementStep] = useState<
+		'menu' | 'rename' | 'move' | 'task-edit'
+	>('menu');
+	const [selectedTargetFolder, setSelectedTargetFolder] = useState<
+		number | null
+	>(null);
 
-	const isLecturer = user?.role === 'teacher';
+	const isLecturer = user?.role === 'prowadzacy';
+
+	const isDeadlinePassed = (deadline?: string) => {
+		if (!deadline) return false;
+		return new Date(deadline) < new Date();
+	};
 
 	useEffect(() => {
 		if (editingItem) {
@@ -85,16 +81,10 @@ export default function CourseDetailsPage() {
 				name: editingItem.name,
 				description: editingItem.description || '',
 				deadline: editingItem.deadline || '',
-				folderName: '', // Selected target folder
 			});
 			setManagementStep('menu');
 		}
 	}, [editingItem]);
-
-	const isDeadlinePassed = (deadline?: string) => {
-		if (!deadline) return false;
-		return new Date(deadline) < new Date();
-	};
 
 	const fetchMaterials = async () => {
 		if (!id) return;
@@ -110,8 +100,8 @@ export default function CourseDetailsPage() {
 		if (!editingItem || !id) return;
 		setIsActionLoading(true);
 		try {
-			if (editingItem.type === 'folder') {
-				await api.materials.renameFolder(Number(id), editingItem.name, editForm.name);
+			if (editingItem.type === 'folder' && editingItem.dbId) {
+				await api.materials.renameFolder(editingItem.dbId, editForm.name);
 			} else if (editingItem.type === 'task') {
 				await api.tasks.update(editingItem.id, { title: editForm.name });
 			} else {
@@ -146,14 +136,16 @@ export default function CourseDetailsPage() {
 		}
 	};
 
-	const handleMove = async (targetFolder: string) => {
+	const handleMove = async (targetFolderId: number | null) => {
 		if (!editingItem) return;
 		setIsActionLoading(true);
 		try {
 			if (editingItem.type === 'task') {
-				await api.tasks.update(editingItem.id, { folderName: targetFolder });
+				await api.tasks.update(editingItem.id, { folderId: targetFolderId });
 			} else if (editingItem.type === 'file') {
-				await api.materials.update(editingItem.id, { folderName: targetFolder });
+				await api.materials.update(editingItem.id, {
+					folderId: targetFolderId,
+				});
 			}
 			await fetchMaterials();
 			setEditingItem(null);
@@ -166,11 +158,16 @@ export default function CourseDetailsPage() {
 	};
 
 	const handleDelete = async () => {
-		if (!editingItem || !id || !confirm(`Czy na pewno chcesz usunąć: ${editingItem.name}?`)) return;
+		if (
+			!editingItem ||
+			!id ||
+			!confirm(`Czy na pewno chcesz usunąć: ${editingItem.name}?`)
+		)
+			return;
 		setIsActionLoading(true);
 		try {
-			if (editingItem.type === 'folder') {
-				await api.materials.deleteFolder(Number(id), editingItem.name);
+			if (editingItem.type === 'folder' && editingItem.dbId) {
+				await api.materials.deleteFolder(editingItem.dbId);
 			} else if (editingItem.type === 'task') {
 				await api.tasks.delete(editingItem.id);
 			} else {
@@ -185,6 +182,81 @@ export default function CourseDetailsPage() {
 			setIsActionLoading(false);
 		}
 	};
+
+	const handleCreateFolder = async () => {
+		if (!id || !newFolderName) return;
+		setIsActionLoading(true);
+		try {
+			await api.materials.createFolder(Number(id), newFolderName);
+			await fetchMaterials();
+			setIsFolderModalOpen(false);
+			setNewFolderName('');
+		} catch (err) {
+			console.error('Folder creation failed:', err);
+			alert('Błąd podczas tworzenia folderu');
+		} finally {
+			setIsActionLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		const abortController = new AbortController();
+
+		const fetchSubmissions = async () => {
+			if (isSubmissionsModalOpen && taskForSubmissions) {
+				setIsSubmissionsLoading(true);
+				try {
+					const data = await api.submissions.getAllTaskSubmissions(
+						taskForSubmissions.id,
+					);
+					if (!abortController.signal.aborted) {
+						setSubmissions(data);
+					}
+				} catch (err) {
+					if (!abortController.signal.aborted) {
+						console.error('Failed to fetch submissions:', err);
+						setSubmissions([]);
+					}
+				} finally {
+					if (!abortController.signal.aborted) {
+						setIsSubmissionsLoading(false);
+					}
+				}
+			} else {
+				setSubmissions([]);
+			}
+		};
+		fetchSubmissions();
+
+		return () => abortController.abort();
+	}, [isSubmissionsModalOpen, taskForSubmissions]);
+
+	useEffect(() => {
+		const abortController = new AbortController();
+
+		const fetchMySubmissions = async () => {
+			if (selectedTask && user?.id) {
+				try {
+					const files = await api.submissions.getTaskSubmissions(
+						selectedTask.id,
+						user.id,
+					);
+					if (!abortController.signal.aborted) {
+						setServerFiles(files);
+					}
+				} catch (err) {
+					if (!abortController.signal.aborted) {
+						console.error('Failed to fetch my submissions:', err);
+					}
+				}
+			} else {
+				setServerFiles([]);
+			}
+		};
+		fetchMySubmissions();
+
+		return () => abortController.abort();
+	}, [selectedTask, user?.id]);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) {
@@ -221,21 +293,21 @@ export default function CourseDetailsPage() {
 				await api.materials.upload(
 					Number(id),
 					submittedFiles,
-					newFolderName || undefined,
+					selectedTargetFolder || undefined,
 				);
 			} else {
-				// Real task creation
 				await api.tasks.create(Number(id), {
 					title: taskDetails.title,
 					description: taskDetails.description,
 					deadline: taskDetails.deadline,
+					folderId: selectedTargetFolder || undefined,
 				});
 			}
 			await fetchMaterials();
 			setIsUploadModalOpen(false);
 			setSubmittedFiles([]);
 			setTaskDetails({ title: '', description: '', deadline: '' });
-			setNewFolderName('');
+			setSelectedTargetFolder(null);
 		} catch (err) {
 			console.error('Upload failed:', err);
 			alert('Błąd podczas wysyłania pliku');
@@ -294,13 +366,21 @@ export default function CourseDetailsPage() {
 	};
 
 	useEffect(() => {
+		const abortController = new AbortController();
+
 		const fetchCourseData = async () => {
 			if (!id) return;
 			try {
 				const data = await api.courses.getById(Number(id));
+				
+				if (abortController.signal.aborted) return;
+
 				if (data) {
 					setCourse(data);
 					const mats = await api.materials.getByCourseId(Number(id));
+					
+					if (abortController.signal.aborted) return;
+					
 					setMaterials(mats);
 					const folderIds = mats
 						.filter(m => m.type === 'folder')
@@ -308,12 +388,20 @@ export default function CourseDetailsPage() {
 					setOpenFolders(folderIds.slice(0, 1));
 				}
 			} catch (err) {
-				console.error('Failed to fetch course:', err);
+				if (!abortController.signal.aborted) {
+					console.error('Failed to fetch course:', err);
+				}
 			} finally {
-				setIsLoading(false);
+				if (!abortController.signal.aborted) {
+					setIsLoading(false);
+				}
 			}
 		};
 		fetchCourseData();
+
+		return () => {
+			abortController.abort();
+		};
 	}, [id]);
 
 	const toggleFolder = (folderId: string | number) => {
@@ -365,6 +453,18 @@ export default function CourseDetailsPage() {
 			</div>
 		);
 	}
+
+	// Helper to get all folders in a flat list for select
+	const allFolders: { id: number; name: string }[] = [];
+	const extractFolders = (items: Material[]) => {
+		items.forEach(item => {
+			if (item.type === 'folder' && item.dbId) {
+				allFolders.push({ id: item.dbId, name: item.name });
+				if (item.children) extractFolders(item.children);
+			}
+		});
+	};
+	extractFolders(materials);
 
 	return (
 		<div className='space-y-8'>
@@ -507,50 +607,87 @@ export default function CourseDetailsPage() {
 									</div>
 								</div>
 
-								{/* Folder Children */}
-								{item.type === 'folder' &&
-									openFolders.includes(item.id) &&
-									item.children && (
-										<div className='bg-brand-light/10 pl-6 divide-y divide-brand-gray/5 border-l-2 border-brand-sand/20 ml-10 mb-2'>
-											{item.children.map(child => (
-												<div
-													key={child.id}
-													className='flex items-center justify-between px-6 py-3 hover:bg-white transition-colors group cursor-pointer'>
-													<div className='flex items-center gap-3 flex-1 min-w-0'>
-														{renderIcon(child)}
-														<div>
-															<p className='text-sm font-semibold text-brand-navy truncate group-hover:text-brand-sand transition-colors'>
-																{child.name}
-															</p>
-															<p className='text-[10px] text-muted-foreground uppercase font-bold tracking-tighter'>
-																{child.format} • {child.size}
-															</p>
+								{/* Folder Children (Recursive support) */}
+								{item.type === 'folder' && openFolders.includes(item.id) && (
+									<div className='bg-brand-light/10 pl-6 divide-y divide-brand-gray/5 border-l-2 border-brand-sand/20 ml-10 mb-2'>
+										{item.children && item.children.length > 0 ? (
+											item.children.map(child => (
+												<div key={child.id} className='flex flex-col'>
+													<div
+														className='flex items-center justify-between px-6 py-3 hover:bg-white transition-colors group cursor-pointer'
+														onClick={e => {
+															e.stopPropagation();
+															if (child.type === 'folder')
+																toggleFolder(child.id);
+															if (child.type === 'task') {
+																if (isLecturer) {
+																	setTaskForSubmissions(child);
+																	setIsSubmissionsModalOpen(true);
+																} else {
+																	setSelectedTask(child);
+																}
+															}
+															if (child.type === 'file') {
+																handleDownload(child.id);
+															}
+														}}>
+														<div className='flex items-center gap-3 flex-1 min-w-0'>
+															{renderIcon(child)}
+															<div>
+																<p className='text-sm font-semibold text-brand-navy truncate group-hover:text-brand-sand transition-colors'>
+																	{child.name}
+																</p>
+																{child.type === 'file' && (
+																	<p className='text-[10px] text-muted-foreground uppercase font-bold tracking-tighter'>
+																		{child.format} • {child.size}
+																	</p>
+																)}
+																{child.type === 'task' && child.deadline && (
+																	<p
+																		className={cn(
+																			'text-[10px] font-bold tracking-tighter uppercase flex items-center gap-1',
+																			isDeadlinePassed(child.deadline)
+																				? 'text-gray-400'
+																				: 'text-orange-600',
+																		)}>
+																		Termin: {child.deadline}
+																	</p>
+																)}
+															</div>
+														</div>
+														<div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+															{child.type === 'file' && (
+																<button
+																	onClick={e => {
+																		e.stopPropagation();
+																		handleDownload(child.id);
+																	}}
+																	className='p-1.5 text-muted-foreground hover:text-brand-navy transition-colors cursor-pointer'>
+																	<Download className='w-3.5 h-3.5' />
+																</button>
+															)}
+															{isLecturer && (
+																<button
+																	onClick={e => {
+																		e.stopPropagation();
+																		setEditingItem(child);
+																	}}
+																	className='p-1.5 text-muted-foreground hover:text-brand-navy transition-colors cursor-pointer'>
+																	<MoreVertical className='w-3.5 h-3.5' />
+																</button>
+															)}
 														</div>
 													</div>
-													<div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-														<button
-															onClick={e => {
-																e.stopPropagation();
-																handleDownload(child.id);
-															}}
-															className='p-1.5 text-muted-foreground hover:text-brand-navy transition-colors cursor-pointer'>
-															<Download className='w-3.5 h-3.5' />
-														</button>
-														{isLecturer && (
-															<button
-																onClick={e => {
-																	e.stopPropagation();
-																	setEditingItem(child);
-																}}
-																className='p-1.5 text-muted-foreground hover:text-brand-navy transition-colors cursor-pointer'>
-																<MoreVertical className='w-3.5 h-3.5' />
-															</button>
-														)}
-													</div>
+													{/* Nested folders support could be added here by recursively calling a renderMaterials function */}
 												</div>
-											))}
-										</div>
-									)}
+											))
+										) : (
+											<div className='px-6 py-4 text-s italic text-muted-foreground/40 cursor-default'>
+												Brak materiałów
+											</div>
+										)}
+									</div>
+								)}
 							</div>
 						))
 					)}
@@ -571,15 +708,20 @@ export default function CourseDetailsPage() {
 						</button>
 						<button
 							onClick={handleTaskSubmit}
-							disabled={isSubmitting || (!isLecturer && isDeadlinePassed(selectedTask?.deadline))}
+							disabled={
+								isSubmitting ||
+								(!isLecturer && isDeadlinePassed(selectedTask?.deadline))
+							}
 							className='bg-brand-navy text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-brand-sm flex items-center gap-2 disabled:opacity-50 disabled:bg-gray-400'>
 							{isSubmitting && <Loader2 className='w-4 h-4 animate-spin' />}
-							{(!isLecturer && isDeadlinePassed(selectedTask?.deadline)) ? 'Termin Minął' : 'Wyślij Rozwiązanie'}
+							{!isLecturer && isDeadlinePassed(selectedTask?.deadline)
+								? 'Termin Minął'
+								: 'Wyślij Rozwiązanie'}
 						</button>
-						</>
-						}>
-						<div className='space-y-6'>
-						{(!isLecturer && isDeadlinePassed(selectedTask?.deadline)) && (
+					</>
+				}>
+				<div className='space-y-6'>
+					{!isLecturer && isDeadlinePassed(selectedTask?.deadline) && (
 						<div className='bg-red-50 p-4 rounded-2xl border border-red-100 flex gap-4 text-red-700 animate-in fade-in slide-in-from-top-2'>
 							<div className='bg-red-100 p-2 rounded-lg text-red-600 h-fit'>
 								<AlertCircle className='w-5 h-5' />
@@ -587,12 +729,15 @@ export default function CourseDetailsPage() {
 							<div>
 								<p className='font-bold'>Czas na oddanie zadania upłynął</p>
 								<p className='text-sm mt-1'>
-									Nie możesz już przesyłać nowych plików ani modyfikować obecnych dla tego zadania.
+									Nie możesz już przesyłać nowych plików ani modyfikować
+									obecnych dla tego zadania.
 								</p>
 							</div>
 						</div>
-						)}
-						<div className='bg-orange-50 p-4 rounded-2xl border border-orange-100 flex gap-4'>						<div className='bg-orange-100 p-2 rounded-lg text-orange-600 h-fit'>
+					)}
+					<div className='bg-orange-50 p-4 rounded-2xl border border-orange-100 flex gap-4'>
+						{' '}
+						<div className='bg-orange-100 p-2 rounded-lg text-orange-600 h-fit'>
 							<AlertCircle className='w-5 h-5' />
 						</div>
 						<div>
@@ -634,7 +779,9 @@ export default function CourseDetailsPage() {
 											onClick={() => handleRemoveServerFile(file.id)}
 											className={cn(
 												'p-1.5 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100',
-												!isLecturer && isDeadlinePassed(selectedTask?.deadline) && 'hidden'
+												!isLecturer &&
+													isDeadlinePassed(selectedTask?.deadline) &&
+													'hidden',
 											)}>
 											<Trash2 className='w-4 h-4' />
 										</button>
@@ -670,7 +817,8 @@ export default function CourseDetailsPage() {
 						{/* Dropzone */}
 						<div
 							onClick={() => {
-								if (!isLecturer && isDeadlinePassed(selectedTask?.deadline)) return;
+								if (!isLecturer && isDeadlinePassed(selectedTask?.deadline))
+									return;
 								document.getElementById('file-upload')?.click();
 							}}
 							className={cn(
@@ -684,7 +832,9 @@ export default function CourseDetailsPage() {
 								type='file'
 								multiple
 								className='hidden'
-								disabled={!isLecturer && isDeadlinePassed(selectedTask?.deadline)}
+								disabled={
+									!isLecturer && isDeadlinePassed(selectedTask?.deadline)
+								}
 								onChange={handleFileChange}
 							/>
 							<div className='w-12 h-12 bg-brand-light rounded-full flex items-center justify-center text-brand-navy group-hover:bg-brand-sand transition-colors'>
@@ -715,10 +865,10 @@ export default function CourseDetailsPage() {
 					managementStep === 'rename'
 						? 'Zmień nazwę'
 						: managementStep === 'move'
-						? 'Przenieś do folderu'
-						: managementStep === 'task-edit'
-						? 'Edytuj zadanie'
-						: `Zarządzaj: ${editingItem?.name}`
+							? 'Przenieś do folderu'
+							: managementStep === 'task-edit'
+								? 'Edytuj zadanie'
+								: `Zarządzaj: ${editingItem?.name}`
 				}
 				size={managementStep === 'task-edit' ? 'md' : 'sm'}
 				footer={
@@ -807,7 +957,9 @@ export default function CourseDetailsPage() {
 								className='w-full p-3 bg-brand-light border-none rounded-xl text-sm focus:ring-2 focus:ring-brand-sand transition-all'
 								autoFocus
 								value={editForm.name}
-								onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+								onChange={e =>
+									setEditForm({ ...editForm, name: e.target.value })
+								}
 								onKeyDown={e => e.key === 'Enter' && handleRename()}
 							/>
 						</div>
@@ -820,7 +972,7 @@ export default function CourseDetailsPage() {
 							Wybierz folder docelowy
 						</p>
 						<button
-							onClick={() => handleMove('')}
+							onClick={() => handleMove(null)}
 							disabled={isActionLoading}
 							className='flex items-center gap-3 w-full p-3 rounded-xl hover:bg-brand-light transition-colors text-left border border-transparent hover:border-brand-gray/10'>
 							<div className='p-2 bg-gray-100 text-gray-600 rounded-lg'>
@@ -831,22 +983,20 @@ export default function CourseDetailsPage() {
 							</span>
 						</button>
 
-						{materials
-							.filter(m => m.type === 'folder')
-							.map(folder => (
-								<button
-									key={folder.id}
-									disabled={isActionLoading}
-									onClick={() => handleMove(folder.name)}
-									className='flex items-center gap-3 w-full p-3 rounded-xl hover:bg-brand-light transition-colors text-left border border-transparent hover:border-brand-gray/10'>
-									<div className='p-2 bg-brand-sand/10 text-brand-sand rounded-lg'>
-										<Folder className='w-4 h-4 fill-brand-sand/20' />
-									</div>
-									<span className='font-bold text-brand-navy text-sm'>
-										{folder.name}
-									</span>
-								</button>
-							))}
+						{allFolders.map(folder => (
+							<button
+								key={folder.id}
+								disabled={isActionLoading}
+								onClick={() => handleMove(folder.id)}
+								className='flex items-center gap-3 w-full p-3 rounded-xl hover:bg-brand-light transition-colors text-left border border-transparent hover:border-brand-gray/10'>
+								<div className='p-2 bg-brand-sand/10 text-brand-sand rounded-lg'>
+									<Folder className='w-4 h-4 fill-brand-sand/20' />
+								</div>
+								<span className='font-bold text-brand-navy text-sm'>
+									{folder.name}
+								</span>
+							</button>
+						))}
 
 						<button
 							onClick={() => setManagementStep('menu')}
@@ -866,7 +1016,9 @@ export default function CourseDetailsPage() {
 								type='text'
 								className='w-full p-3 bg-brand-light border-none rounded-xl text-sm focus:ring-2 focus:ring-brand-sand transition-all'
 								value={editForm.name}
-								onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+								onChange={e =>
+									setEditForm({ ...editForm, name: e.target.value })
+								}
 							/>
 						</div>
 						<div className='space-y-2'>
@@ -975,7 +1127,12 @@ export default function CourseDetailsPage() {
 											</td>
 											<td className='px-4 py-3 text-right'>
 												<button
-													onClick={() => api.materials.downloadSubmissionZip(sub.id, sub.student)}
+													onClick={() =>
+														api.materials.downloadSubmissionZip(
+															sub.id,
+															sub.student,
+														)
+													}
 													className='p-2 bg-brand-light text-brand-navy rounded-lg hover:bg-brand-sand transition-colors shadow-sm'>
 													<Download className='w-4 h-4' />
 												</button>
@@ -1107,6 +1264,27 @@ export default function CourseDetailsPage() {
 							</>
 						)}
 
+						<div className='space-y-2'>
+							<label className='text-xs font-bold text-brand-navy uppercase tracking-wider text-muted-foreground'>
+								Folder docelowy
+							</label>
+							<select
+								className='w-full p-3 bg-brand-light border-none rounded-xl text-sm focus:ring-2 focus:ring-brand-sand transition-all'
+								value={selectedTargetFolder || ''}
+								onChange={e =>
+									setSelectedTargetFolder(
+										e.target.value ? Number(e.target.value) : null,
+									)
+								}>
+								<option value=''>Główny katalog</option>
+								{allFolders.map(f => (
+									<option key={f.id} value={f.id}>
+										{f.name}
+									</option>
+								))}
+							</select>
+						</div>
+
 						{submittedFiles.length > 0 && (
 							<div className='space-y-2 mb-4'>
 								{submittedFiles.map((file, idx) => (
@@ -1174,14 +1352,23 @@ export default function CourseDetailsPage() {
 				title='Utwórz nowy folder'
 				size='sm'
 				footer={
-					<button
-						onClick={() => {
-							setIsFolderModalOpen(false);
-							setIsUploadModalOpen(true);
-						}}
-						className='bg-brand-navy text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-brand-sm w-full'>
-						Kontynuuj (dodaj plik do folderu)
-					</button>
+					<div className='flex gap-2 w-full'>
+						<button
+							onClick={() => setIsFolderModalOpen(false)}
+							className='flex-1 px-6 py-2.5 text-sm font-bold text-muted-foreground hover:text-brand-navy transition-colors'>
+							Anuluj
+						</button>
+						<button
+							onClick={handleCreateFolder}
+							disabled={isActionLoading || !newFolderName}
+							className='flex-1 bg-brand-navy text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-brand-sm disabled:opacity-50'>
+							{isActionLoading ? (
+								<Loader2 className='w-4 h-4 animate-spin mx-auto' />
+							) : (
+								'Utwórz'
+							)}
+						</button>
+					</div>
 				}>
 				<div className='space-y-4'>
 					<div className='p-4 bg-brand-sand/10 rounded-2xl flex justify-center mb-6'>

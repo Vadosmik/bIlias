@@ -76,6 +76,7 @@ export class AuthService {
         email: user.email,
         imie: user.imie,
         nazwisko: user.nazwisko,
+        role: 'student',
       },
     };
   }
@@ -121,7 +122,8 @@ export class AuthService {
         email: user.email,
         imie: user.imie,
         nazwisko: user.nazwisko,
+        role: user.role,
       },
     };
-  }
-}
+    }
+    }

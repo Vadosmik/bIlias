@@ -44,10 +44,13 @@ export interface Course {
 	description?: string;
 	ects?: number;
 	materials?: Material[];
+	materialsCount?: number;
+	pendingTasks?: Material[];
 }
 
 export interface Material {
 	id: string | number;
+	dbId?: number; // Backend database ID
 	type: 'folder' | 'file' | 'task';
 	name: string;
 	format?: string;
@@ -56,14 +59,6 @@ export interface Material {
 	description?: string;
 	children?: Material[];
 }
-
-const mockCourses: Course[] = [
-  { id: '1', name: 'Bazy Danych', code: 'BD-2024', department: 'Wydział Elektryczny', semester: 6, lecturers: ['Dr inż. Tomasz Papierowski'], joined: true, progress: 75 },
-  { id: '2', name: 'Programowanie Obiektowe', code: 'PO-2024', department: 'Wydział Elektryczny', semester: 6, lecturers: ['Mgr inż. Kacper Szamszon'], joined: true, progress: 40 },
-  { id: '3', name: 'Sieci Komputerowe', code: 'SK-2024', department: 'Wydział Elektryczny', semester: 6, lecturers: ['Dr Sofiia Stankevych'], joined: true, progress: 90 },
-  { id: '4', name: 'Systemy Operacyjne', code: 'SO-2024', department: 'Wydział Elektryczny', semester: 5, lecturers: ['Dr inż. Vadzim Mikanovich'], joined: false },
-  { id: '5', name: 'Matematyka Dyskretna', code: 'MD-2023', department: 'Wydział Elektryczny', semester: 1, lecturers: ['Mgr Monika Szczepańska'], joined: false },
-];
 
 export const api = {
 	auth: {
@@ -123,7 +118,7 @@ export const api = {
 	tasks: {
 		create: async (
 			courseId: number,
-			data: { title: string; description: string; deadline: string },
+			data: { title: string; description: string; deadline: string; folderId?: number },
 		): Promise<any> => {
 			return request(`/courses/${courseId}/tasks`, {
 				method: 'POST',
@@ -132,7 +127,7 @@ export const api = {
 		},
 		update: async (
 			taskId: string | number,
-			data: { title?: string; description?: string; deadline?: string },
+			data: { title?: string; description?: string; deadline?: string; folderId?: number | null },
 		): Promise<void> => {
 			const id =
 				typeof taskId === 'string' && taskId.startsWith('t-')
@@ -160,13 +155,13 @@ export const api = {
 		upload: async (
 			courseId: number,
 			files: File[],
-			folderName?: string,
+			folderId?: number,
 		): Promise<Material[]> => {
 			const formData = new FormData();
 			files.forEach(file => {
 				formData.append('files', file);
 			});
-			if (folderName) formData.append('folderName', folderName);
+			if (folderId) formData.append('folderId', folderId.toString());
 
 			return request<Material[]>(`/courses/${courseId}/materials`, {
 				method: 'POST',
@@ -175,7 +170,7 @@ export const api = {
 		},
 		update: async (
 			materialId: string | number,
-			data: { name?: string; folderName?: string },
+			data: { name?: string; folderId?: number | null },
 		): Promise<void> => {
 			const id =
 				typeof materialId === 'string' && materialId.startsWith('m-')
@@ -195,26 +190,31 @@ export const api = {
 				method: 'DELETE',
 			});
 		},
-		renameFolder: async (
+		createFolder: async (
 			courseId: number,
-			oldName: string,
-			newName: string,
+			nazwa: string,
+			parentId?: number,
 		): Promise<void> => {
 			await request(`/courses/${courseId}/folders`, {
+				method: 'POST',
+				body: JSON.stringify({ nazwa, parentId }),
+			});
+		},
+		renameFolder: async (
+			folderId: number,
+			newName: string,
+		): Promise<void> => {
+			await request(`/folders/${folderId}`, {
 				method: 'PATCH',
-				body: JSON.stringify({ oldName, newName }),
+				body: JSON.stringify({ nazwa: newName }),
 			});
 		},
 		deleteFolder: async (
-			courseId: number,
-			folderName: string,
+			folderId: number,
 		): Promise<void> => {
-			await request(
-				`/courses/${courseId}/folders?folderName=${encodeURIComponent(folderName)}`,
-				{
-					method: 'DELETE',
-				},
-			);
+			await request(`/folders/${folderId}`, {
+				method: 'DELETE',
+			});
 		},
 		download: async (materialId: string | number): Promise<void> => {
 			// Stripping 'm-' prefix if present from string IDs

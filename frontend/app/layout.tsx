@@ -18,6 +18,9 @@ const notoSerif = Noto_Serif_Georgian({
 export const metadata: Metadata = {
   title: "bIlias — Platforma e-learningowa Uniwersytetu Morskiego w Gdyni",
   description: "Nowoczesna, intuicyjna platforma e-learningowa dla studentów i wykładowców UMG.",
+  icons: {
+    icon: '/images/favicon.svg',
+  },
 };
 
 export default function RootLayout({

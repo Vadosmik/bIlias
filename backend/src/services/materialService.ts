@@ -1,7 +1,6 @@
-import { materialRepository, zadanieRepository } from '../repositories/materialRepository.js';
-import type { MaterialItem } from '../model/materialModel.js';
+import { materialRepository, zadanieRepository, folderRepository } from '../repositories/materialRepository.js';
+import type { MaterialItem, Folder } from '../model/materialModel.js';
 import fs from 'fs';
-import path from 'path';
 
 const FORMAT_MAP: Record<string, string> = {
   'pdf': 'pdf',
@@ -36,81 +35,77 @@ function getFileFormat(mimeType: string | null): string | undefined {
 
 export class MaterialService {
   public async getMaterialsForCourse(kursId: number): Promise<MaterialItem[]> {
-    const [materials, zadania] = await Promise.all([
+    const [folders, materials, zadania] = await Promise.all([
+      folderRepository.findByKursId(kursId),
       materialRepository.findByKursId(kursId),
       zadanieRepository.findByKursId(kursId),
     ]);
 
-    const items: MaterialItem[] = [];
+    const itemMap = new Map<number | null, MaterialItem[]>();
+    
+    // Initialize root and folders
+    itemMap.set(null, []); // Root items
+    for (const folder of folders) {
+      itemMap.set(folder.id, []);
+    }
 
-    // Group materials by their path/title prefix to create folders
-    const materialMap = new Map<string, MaterialItem>();
-    const rootItems: MaterialItem[] = [];
+    // Add folders to their parents
+    const folderMap = new Map<number, MaterialItem>();
+    for (const folder of folders) {
+      const item: MaterialItem = {
+        id: `f-${folder.id}`,
+        dbId: folder.id,
+        type: 'folder',
+        name: folder.nazwa,
+        children: itemMap.get(folder.id)
+      };
+      folderMap.set(folder.id, item);
+    }
 
+    const rootItems: MaterialItem[] = itemMap.get(null)!;
+
+    for (const folder of folders) {
+      const item = folderMap.get(folder.id)!;
+      if (folder.parent_id && folderMap.has(folder.parent_id)) {
+        folderMap.get(folder.parent_id)!.children!.push(item);
+      } else {
+        rootItems.push(item);
+      }
+    }
+
+    // Add materials
     for (const mat of materials) {
-      const typPliku = await materialRepository.findTypPlikuById(mat.typ_pliku_id || 0);
-      const format = getFileFormat(mat.mime_type) || typPliku?.nazwa.toLowerCase() || 'file';
+      const format = getFileFormat(mat.mime_type) || 'file';
 
       const item: MaterialItem = {
         id: `m-${mat.id}`,
+        dbId: mat.id,
         type: 'file',
         name: mat.tytul,
         format: format,
         size: formatSize(mat.rozmiar),
       };
 
-      materialMap.set(`m-${mat.id}`, item);
-
-      // Check if title looks like it belongs in a folder (e.g., "Laboratorium 1 - Wprowadzenie")
-      const folderMatch = mat.tytul.match(/^(.+?)\s*-\s*(.+)$/);
-      if (folderMatch) {
-        const [, folderName, fileName] = folderMatch;
-        let folder = rootItems.find(f => f.name === folderName);
-
-        if (!folder) {
-          folder = {
-            id: `folder-${folderName.replace(/\s+/g, '-')}`,
-            type: 'folder',
-            name: folderName,
-            children: [],
-          };
-          rootItems.push(folder);
-        }
-
-        folder.children = folder.children || [];
-        folder.children.push({ ...item, name: fileName });
+      if (mat.folder_id && itemMap.has(mat.folder_id)) {
+        itemMap.get(mat.folder_id)!.push(item);
       } else {
         rootItems.push(item);
       }
     }
 
-    // Add zadania as tasks
+    // Add zadania
     for (const zad of zadania) {
       const item: MaterialItem = {
         id: `t-${zad.id}`,
-        type: 'task',
+        dbId: zad.id,
+        type: 'task', // Ten typ musi byc 'task' zeby frontend go zliczyl
         name: zad.tytul,
         deadline: formatDate(zad.termin_oddania),
         description: zad.opis || undefined,
       };
 
-      const folderMatch = zad.tytul.match(/^(.+?)\s*-\s*(.+)$/);
-      if (folderMatch) {
-        const [, folderName, taskName] = folderMatch;
-        let folder = rootItems.find(f => f.name === folderName);
-
-        if (!folder) {
-          folder = {
-            id: `folder-${folderName.replace(/\s+/g, '-')}`,
-            type: 'folder',
-            name: folderName,
-            children: [],
-          };
-          rootItems.push(folder);
-        }
-
-        folder.children = folder.children || [];
-        folder.children.push({ ...item, name: taskName });
+      if (zad.folder_id && itemMap.has(zad.folder_id)) {
+        itemMap.get(zad.folder_id)!.push(item);
       } else {
         rootItems.push(item);
       }
@@ -122,22 +117,19 @@ export class MaterialService {
   public async uploadMaterial(params: {
     kursId: number;
     title: string;
-    folderName?: string;
+    folderId?: number | null;
     file: Express.Multer.File;
   }) {
-    const finalTitle = params.folderName 
-      ? `${params.folderName} - ${params.title}` 
-      : params.title;
-
     const typPlikuId = 1;
 
     return await materialRepository.createMaterial({
       kursId: params.kursId,
-      tytul: finalTitle,
+      tytul: params.title,
       sciezkaPliku: params.file.path,
       typPlikuId: typPlikuId,
       rozmiar: params.file.size,
-      mimeType: params.file.mimetype
+      mimeType: params.file.mimetype,
+      folderId: params.folderId
     });
   }
 
@@ -146,12 +138,26 @@ export class MaterialService {
     title: string;
     description: string;
     deadline: string;
+    folderId?: number | null;
   }) {
     return await zadanieRepository.createTask({
       kursId: params.kursId,
       tytul: params.title,
       opis: params.description,
-      terminOddania: params.deadline
+      terminOddania: params.deadline,
+      folderId: params.folderId
+    });
+  }
+
+  public async createFolder(params: {
+    kursId: number;
+    nazwa: string;
+    parentId?: number | null;
+  }) {
+    return await folderRepository.create({
+      kurs_id: params.kursId,
+      nazwa: params.nazwa,
+      parent_id: params.parentId
     });
   }
 
@@ -168,48 +174,28 @@ export class MaterialService {
 
     return {
       path: material.sciezka_pliku,
-      originalName: material.tytul.split(' - ').pop() || material.tytul,
+      originalName: material.tytul,
       mimeType: material.mime_type
     };
   }
 
-  public async updateMaterial(id: number, data: { name?: string, folderName?: string }) {
-    const material = await materialRepository.findByMaterialId(id);
-    if (!material) throw new Error('Materiał nie istnieje');
-
-    const match = material.tytul.match(/^(.+?)\s*-\s*(.+)$/);
-    const currentFolder = match ? match[1] : '';
-    const currentName = match ? match[2] : material.tytul;
-
-    const finalName = data.name !== undefined ? data.name : currentName;
-    const finalFolder = data.folderName !== undefined ? data.folderName : currentFolder;
-
-    const newTitle = finalFolder ? `${finalFolder} - ${finalName}` : finalName;
-
-    return await materialRepository.updateMaterial(id, { tytul: newTitle });
+  public async updateMaterial(id: number, data: { name?: string, folderId?: number | null }) {
+    return await materialRepository.updateMaterial(id, { 
+      tytul: data.name, 
+      folder_id: data.folderId 
+    });
   }
 
   public async deleteMaterial(id: number) {
     return await materialRepository.deleteMaterial(id);
   }
 
-  public async updateTask(id: number, data: { title?: string, description?: string, deadline?: string, folderName?: string }) {
-    const task = await zadanieRepository.findById(id);
-    if (!task) throw new Error('Zadanie nie istnieje');
-
-    const match = task.tytul.match(/^(.+?)\s*-\s*(.+)$/);
-    const currentFolder = match ? match[1] : '';
-    const currentTitle = match ? match[2] : task.tytul;
-
-    const finalTitle = data.title !== undefined ? data.title : currentTitle;
-    const finalFolder = data.folderName !== undefined ? data.folderName : currentFolder;
-
-    const newTitle = finalFolder ? `${finalFolder} - ${finalTitle}` : finalTitle;
-
+  public async updateTask(id: number, data: { title?: string, description?: string, deadline?: string, folderId?: number | null }) {
     return await zadanieRepository.updateTask(id, {
-      tytul: newTitle,
+      tytul: data.title,
       opis: data.description,
-      terminOddania: data.deadline
+      terminOddania: data.deadline,
+      folder_id: data.folderId
     });
   }
 
@@ -217,38 +203,11 @@ export class MaterialService {
     return await zadanieRepository.deleteTask(id);
   }
 
-  public async renameFolder(kursId: number, oldName: string, newName: string) {
-    // Update materials
-    const materials = await materialRepository.findByKursIdAndFolderPrefix(kursId, oldName);
-    for (const mat of materials) {
-      const match = mat.tytul.match(/^(.+?)\s*-\s*(.+)$/);
-      if (match && match[1] === oldName) {
-        const fileName = match[2];
-        const newTitle = `${newName} - ${fileName}`;
-        await materialRepository.updateMaterial(mat.id, { tytul: newTitle });
-      }
-    }
-
-    // Update tasks
-    const tasks = await zadanieRepository.findByKursId(kursId);
-    for (const task of tasks) {
-      const match = task.tytul.match(/^(.+?)\s*-\s*(.+)$/);
-      if (match && match[1] === oldName) {
-        const taskName = match[2];
-        const newTitle = `${newName} - ${taskName}`;
-        await zadanieRepository.updateTask(task.id, { tytul: newTitle });
-      }
-    }
+  public async renameFolder(id: number, newName: string) {
+    return await folderRepository.update(id, { nazwa: newName });
   }
 
-  public async deleteFolder(kursId: number, folderName: string) {
-    console.log(`Deleting folder "${folderName}" in course ${kursId}`);
-    
-    await Promise.all([
-      materialRepository.deleteByFolderPrefix(kursId, folderName),
-      zadanieRepository.deleteByFolderPrefix(kursId, folderName)
-    ]);
-
-    console.log(`Folder "${folderName}" deleted successfully`);
+  public async deleteFolder(id: number) {
+    return await folderRepository.delete(id);
   }
 }

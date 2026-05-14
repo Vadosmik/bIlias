@@ -11,10 +11,11 @@ import path from 'path';
 const app = express();
 const PORT = Number(process.env.PORT || 8080);
 
-app.use(cors());
-app.use(cors()); 
-app.use(express.json());
-
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 app.get('/health', (_req: Request, res: Response) => {
@@ -25,7 +26,7 @@ app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({ success: true, message: 'Aplikacja dziala!' });
 });
 
-// Endpoint do testowania logowania
+// Endpointy
 app.use('/auth', authRoutes);
 app.use('/courses', courseRoutes);
 app.use('/submissions', submissionRoutes);

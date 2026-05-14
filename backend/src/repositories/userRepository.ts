@@ -21,9 +21,13 @@ export interface CreateUserInput {
 }
 
 export const userRepository = {
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<(User & { role: string }) | null> {
     const result = await pool.query(
-      'SELECT * FROM uzytkownicy WHERE email = $1 AND deleted_at IS NULL',
+      `SELECT u.*, r.nazwa as role 
+       FROM uzytkownicy u 
+       LEFT JOIN uzytkownik_role ur ON u.id = ur.user_id 
+       LEFT JOIN public.role r ON ur.role_id = r.id
+       WHERE u.email = $1 AND u.deleted_at IS NULL`,
       [email]
     );
     return result.rows[0] || null;

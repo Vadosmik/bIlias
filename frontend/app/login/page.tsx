@@ -30,8 +30,7 @@ export default function LoginPage() {
 		setLoading(true);
 
 		try {
-			const user = await api.auth.login(email, password);
-			login(email, user.role);
+			await login(email, password);
 			router.push('/dashboard');
 		} catch (err) {
 			setError(

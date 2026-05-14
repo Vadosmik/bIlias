@@ -17,7 +17,7 @@ import Image from 'next/image';
 
 const menuItems = [
 	{
-		title: 'Panel',
+		title: 'Panel Główny',
 		icon: LayoutDashboard,
 		href: '/dashboard',
 	},
