@@ -104,6 +104,7 @@ CREATE TABLE public.uzytkownicy (
     hash_hasla VARCHAR(255) NOT NULL,
     imie VARCHAR(100) NOT NULL,
     nazwisko VARCHAR(100) NOT NULL,
+    ustawienia_dashboard BIT VARYING(64),
     aktywny BOOLEAN DEFAULT TRUE,
     utworzono TIMESTAMPTZ DEFAULT NOW(),
     zaktualizowano TIMESTAMPTZ DEFAULT NOW(),
@@ -168,6 +169,65 @@ CREATE TABLE public.kursy (
     rok_koniec INT NOT NULL,
     utworzono TIMESTAMPTZ DEFAULT NOW(),
     CHECK (rok_koniec = rok_start + 1)
+);
+
+-- =========================
+-- INFRASTRUKTURA (SALE)
+-- =========================
+
+CREATE TABLE public.sale (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    budynek VARCHAR(100),
+    numer VARCHAR(50) NOT NULL,
+    pojemnosc INT CHECK (pojemnosc > 0),
+    utworzono TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (budynek, numer)
+);
+
+-- =========================
+-- PLANY ZAJĘĆ
+-- =========================
+
+CREATE TABLE public.plany_zajec (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    kurs_id INT NOT NULL REFERENCES public.kursy(id) ON DELETE CASCADE,
+    dzien_id INT NOT NULL REFERENCES public.dzien_tygodnia_slownik(id),
+    godzina_od TIME NOT NULL,
+    godzina_do TIME NOT NULL,
+    sala_id INT REFERENCES public.sale(id) ON DELETE SET NULL,
+    prowadzacy_id INT REFERENCES public.prowadzacy(prowadzacy_id) ON DELETE SET NULL,
+    wydzial_id INT NOT NULL REFERENCES public.wydzialy(id),
+    kierunek_id INT NOT NULL REFERENCES public.kierunki(id),
+    specjalizacja_id INT REFERENCES public.specjalizacje(id),
+    grupa_oznaczenie VARCHAR(20),
+    typ_zajec VARCHAR(30) CHECK (typ_zajec IN ('wyklad', 'cwiczenia', 'laboratorium', 'projekt', 'seminarium')),
+    aktywny BOOLEAN DEFAULT TRUE,
+    utworzono TIMESTAMPTZ DEFAULT NOW(),
+    CHECK (godzina_do > godzina_od)
+);
+
+-- Blokada kolizji sali
+ALTER TABLE public.plany_zajec
+ADD CONSTRAINT brak_kolizji_sali
+EXCLUDE USING gist (
+    sala_id WITH =,
+    dzien_id WITH =,
+    tsrange(
+        (DATE '1970-01-01' + godzina_od),
+        (DATE '1970-01-01' + godzina_do)
+    ) WITH &&
+);
+
+-- Blokada kolizji prowadzącego
+ALTER TABLE public.plany_zajec
+ADD CONSTRAINT brak_kolizji_prowadzacego
+EXCLUDE USING gist (
+    prowadzacy_id WITH =,
+    dzien_id WITH =,
+    tsrange(
+        (DATE '1970-01-01' + godzina_od),
+        (DATE '1970-01-01' + godzina_do)
+    ) WITH &&
 );
 
 -- =========================
@@ -297,31 +357,6 @@ CREATE TABLE public.wiadomosci_odczyt (
 );
 
 -- =========================
--- HARMONOGRAM (BLOKADA OVERLAP)
--- =========================
-
-CREATE TABLE public.harmonogramy (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    kurs_id INT REFERENCES public.kursy(id) ON DELETE CASCADE,
-    dzien_id INT REFERENCES public.dzien_tygodnia_slownik(id),
-    godzina_start TIME NOT NULL,
-    godzina_koniec TIME NOT NULL,
-    numer_sali VARCHAR(50),
-    CHECK (godzina_koniec > godzina_start)
-);
-
-ALTER TABLE public.harmonogramy
-ADD CONSTRAINT brak_nakladania_zajec
-EXCLUDE USING gist (
-    kurs_id WITH =,
-    dzien_id WITH =,
-    tsrange(
-        (DATE '1970-01-01' + godzina_start), 
-        (DATE '1970-01-01' + godzina_koniec)
-    ) WITH &&
-);
-
--- =========================
 -- AKTUALNOŚCI
 -- =========================
 
@@ -379,6 +414,18 @@ CREATE INDEX idx_wiadomosci_watek_time ON public.wiadomosci(watek_id, wyslano);
 CREATE INDEX idx_wiadomosci_nadawca ON public.wiadomosci(nadawca_id);
 
 CREATE INDEX idx_aktualnosci_kurs ON public.aktualnosci(kurs_id);
+
+CREATE INDEX idx_plany_zajec_wydzial ON public.plany_zajec(wydzial_id);
+
+CREATE INDEX idx_plany_zajec_kierunek ON public.plany_zajec(kierunek_id);
+
+CREATE INDEX idx_plany_zajec_specjalizacja ON public.plany_zajec(specjalizacja_id);
+
+CREATE INDEX idx_plany_zajec_prowadzacy ON public.plany_zajec(prowadzacy_id);
+
+CREATE INDEX idx_plany_zajec_sala ON public.plany_zajec(sala_id);
+
+CREATE INDEX idx_plany_zajec_dzien_godziny ON public.plany_zajec(dzien_id, godzina_od, godzina_do);
 
 -- =========================
 -- INSERT
@@ -908,5 +955,25 @@ VALUES
         NOW() + INTERVAL '7 days',
         (SELECT id FROM public.status_zadania_slownik WHERE nazwa = 'aktywne')
     );
+
+-- =========================
+-- BUDYNKI (SEED)
+-- =========================
+
+INSERT INTO public.sale (budynek, numer, pojemnosc)
+VALUES
+    ('Budynek Główny', 'B202', 120),
+    ('Budynek Główny', 'B210', 120),
+    ('Budynek Główny', 'B122', 30),
+    ('Wydział Elektryczny', 'C122', 25),
+    ('Wydział Elektryczny', 'C215', 45),
+    ('Wydział Elektryczny', 'C47a', 250),
+    ('Wydział Informatyczny', 'F08', 15),
+    ('Wydział Informatyczny', 'F112', 15),
+    ('Wydział Informatyczny', 'F110', 40),
+    ('Wydział Informatyczny', 'F67', 60),
+    ('Hala Sportowa', 'S1', 100),
+    ('Budynek Nawigacji', 'N14', 20),
+    ('Budynek Nawigacji', 'N145', 12);
 
 COMMIT;
