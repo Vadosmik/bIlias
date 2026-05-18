@@ -15,7 +15,10 @@ export class CourseController {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Błąd podczas pobierania kursów',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas pobierania kursów',
       });
     }
   }
@@ -36,7 +39,10 @@ export class CourseController {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Błąd podczas pobierania Twoich kursów',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas pobierania Twoich kursów',
       });
     }
   }
@@ -45,15 +51,19 @@ export class CourseController {
     try {
       const id = Number(req.params.id);
       const userId = req.query.userId ? Number(req.query.userId) : undefined;
-      
+
       if (!id) {
-        res.status(400).json({ success: false, error: 'Nieprawidłowe ID kursu' });
+        res
+          .status(400)
+          .json({ success: false, error: 'Nieprawidłowe ID kursu' });
         return;
       }
 
       const course = await courseService.getCourseById(id, userId);
       if (!course) {
-        res.status(404).json({ success: false, error: 'Kurs nie został znaleziony' });
+        res
+          .status(404)
+          .json({ success: false, error: 'Kurs nie został znaleziony' });
         return;
       }
 
@@ -64,7 +74,10 @@ export class CourseController {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Błąd podczas pobierania szczegółów kursu',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas pobierania szczegółów kursu',
       });
     }
   }
@@ -75,7 +88,9 @@ export class CourseController {
       const userId = Number(req.body.userId);
 
       if (!courseId || !userId) {
-        res.status(400).json({ success: false, error: 'Brakujące dane zapisu' });
+        res
+          .status(400)
+          .json({ success: false, error: 'Brakujące dane zapisu' });
         return;
       }
 
@@ -87,7 +102,10 @@ export class CourseController {
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Błąd podczas zapisywania na kurs',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas zapisywania na kurs',
       });
     }
   }
@@ -98,7 +116,9 @@ export class CourseController {
       const userId = Number(req.body.userId);
 
       if (!courseId || !userId) {
-        res.status(400).json({ success: false, error: 'Brakujące dane wypisu' });
+        res
+          .status(400)
+          .json({ success: false, error: 'Brakujące dane wypisu' });
         return;
       }
 
@@ -110,7 +130,10 @@ export class CourseController {
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Błąd podczas wypisywania z kursu',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas wypisywania z kursu',
       });
     }
   }

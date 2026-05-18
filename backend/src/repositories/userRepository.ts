@@ -81,4 +81,101 @@ export const userRepository = {
     );
     return result.rows;
   },
+
+  async updatePassword(userId: number, newPasswordHash: string): Promise<void> {
+    await pool.query(
+      `UPDATE uzytkownicy SET hash_hasla = $1, zaktualizowano = NOW()
+       WHERE id = $2`,
+      [newPasswordHash, userId]
+    );
+  },
+
+  async getStudentData(userId: number): Promise<{
+    wydzial_id: number;
+    kierunek_id: number;
+    specjalizacja_id: number | null;
+  } | null> {
+    const result = await pool.query(
+      `SELECT wydzial_id, kierunek_id, specjalizacja_id
+       FROM studenci WHERE student_id = $1`,
+      [userId]
+    );
+    return result.rows[0] || null;
+  },
+
+  async getLecturerData(userId: number): Promise<{
+    wydzial_id: number;
+  } | null> {
+    const result = await pool.query(
+      `SELECT wydzial_id FROM prowadzacy WHERE prowadzacy_id = $1`,
+      [userId]
+    );
+    return result.rows[0] || null;
+  },
+
+  async updateStudentProfile(
+    userId: number,
+    data: { wydzial_id?: number; kierunek_id?: number; specjalizacja_id?: number | null }
+  ): Promise<void> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+
+    if (data.wydzial_id !== undefined) {
+      fields.push(`wydzial_id = $${paramIndex++}`);
+      values.push(data.wydzial_id);
+    }
+    if (data.kierunek_id !== undefined) {
+      fields.push(`kierunek_id = $${paramIndex++}`);
+      values.push(data.kierunek_id);
+    }
+    if (data.specjalizacja_id !== undefined) {
+      fields.push(`specjalizacja_id = $${paramIndex++}`);
+      values.push(data.specjalizacja_id);
+    }
+
+    if (fields.length === 0) return;
+
+    values.push(userId);
+    await pool.query(
+      `UPDATE studenci SET ${fields.join(', ')} WHERE student_id = $${paramIndex}`,
+      values
+    );
+  },
+
+  async updateLecturerProfile(
+    userId: number,
+    data: { wydzial_id: number }
+  ): Promise<void> {
+    await pool.query(
+      `UPDATE prowadzacy SET wydzial_id = $1 WHERE prowadzacy_id = $2`,
+      [data.wydzial_id, userId]
+    );
+  },
+
+  async getProfileCompleteness(userId: number): Promise<{ complete: boolean; missing: string[] }> {
+    const roles = await this.getUserRoles(userId);
+    const roleName = roles[0]?.role || 'student';
+
+    const missing: string[] = [];
+
+    if (roleName === 'student') {
+      const student = await this.getStudentData(userId);
+      if (!student) {
+        missing.push('dane studenta');
+      } else {
+        if (!student.wydzial_id) missing.push('wydział');
+        if (!student.kierunek_id) missing.push('kierunek');
+      }
+    } else if (roleName === 'prowadzacy' || roleName === 'teacher') {
+      const lecturer = await this.getLecturerData(userId);
+      if (!lecturer) {
+        missing.push('dane prowadzącego');
+      } else if (!lecturer.wydzial_id) {
+        missing.push('wydział');
+      }
+    }
+
+    return { complete: missing.length === 0, missing };
+  },
 };
