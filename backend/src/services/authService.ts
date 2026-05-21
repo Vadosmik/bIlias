@@ -45,7 +45,7 @@ export class AuthService {
     const parsed = registerSchema.safeParse(input);
 
     if (!parsed.success) {
-      throw new Error('Niepoprawne dane rejestracji: ' + parsed.error.errors.map(e => e.message).join(', '));
+      throw new Error('Niepoprawne dane rejestracji: ' + parsed.error.issues.map((e: any) => e.message).join(', '));
     }
 
     const { email, role } = parsed.data;
@@ -76,18 +76,6 @@ export class AuthService {
     const user = await userRepository.create(createInput);
 
     console.log('Register - created user:', user.id, 'role input:', parsed.data.role);
-
-    if (parsed.data.role) {
-      const roleQuery = await pool.query('SELECT id FROM role WHERE nazwa = $1', [parsed.data.role]);
-      console.log('Role query result:', roleQuery.rows);
-      if (roleQuery.rows.length > 0) {
-        const insertResult = await pool.query(
-          'INSERT INTO uzytkownik_role (user_id, role_id) VALUES ($1, $2)',
-          [user.id, roleQuery.rows[0].id]
-        );
-        console.log('Insert result:', insertResult.rows);
-      }
-    }
 
     const userRoles = await userRepository.getUserRoles(user.id);
     console.log('User roles:', userRoles);

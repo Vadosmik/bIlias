@@ -6,6 +6,7 @@ import { authRoutes } from './routes/authRoutes.js';
 import { courseRoutes } from './routes/courseRoutes.js';
 import { materialRoutes } from './routes/materialRoutes.js';
 import { submissionRoutes } from './routes/submissionRoutes.js';
+import { profileRoutes } from './routes/profileRoutes.js';
 import path from 'path';
 
 const app = express();
@@ -31,6 +32,7 @@ app.use('/auth', authRoutes);
 app.use('/courses', courseRoutes);
 app.use('/submissions', submissionRoutes);
 app.use('/', materialRoutes);
+app.use('/', profileRoutes);
 app.use('/uploads', express.static('uploads'));
 app.use(errorHandler);
 
