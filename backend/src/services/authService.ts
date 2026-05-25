@@ -12,7 +12,6 @@ const registerSchema = z.object({
   wydzialId: z.number().optional(),
   kierunekId: z.number().optional(),
   specjalizacjaId: z.number().optional(),
-  rokStudiow: z.number().optional(),
 });
 
 const loginSchema = z.object({
@@ -29,7 +28,6 @@ export interface RegisterInput {
   wydzialId?: number;
   kierunekId?: number;
   specjalizacjaId?: number;
-  rokStudiow?: number;
 }
 
 export interface LoginInput {
@@ -94,8 +92,8 @@ export class AuthService {
       );
     } else if (!isTeacher) {
       await pool.query(
-        'INSERT INTO public.studenci (student_id, wydzial_id, kierunek_id, specjalizacja_id, rok_studiow, status) VALUES ($1, $2, $3, $4, $5, $6)',
-        [user.id, parsed.data.wydzialId, parsed.data.kierunekId, parsed.data.specjalizacjaId, parsed.data.rokStudiow || 1, 'aktywny']
+        'INSERT INTO public.studenci (student_id, wydzial_id, kierunek_id, specjalizacja_id, status) VALUES ($1, $2, $3, $4, $5)',
+        [user.id, parsed.data.wydzialId, parsed.data.kierunekId, parsed.data.specjalizacjaId, 'aktywny']
       );
     }
 
