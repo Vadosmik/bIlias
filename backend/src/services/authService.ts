@@ -9,6 +9,10 @@ const registerSchema = z.object({
   imie: z.string().min(1),
   nazwisko: z.string().min(1),
   role: z.string().optional(),
+  wydzialId: z.number().optional(),
+  kierunekId: z.number().optional(),
+  specjalizacjaId: z.number().optional(),
+  rokStudiow: z.number().optional(),
 });
 
 const loginSchema = z.object({
@@ -22,6 +26,10 @@ export interface RegisterInput {
   imie: string;
   nazwisko: string;
   role?: string;
+  wydzialId?: number;
+  kierunekId?: number;
+  specjalizacjaId?: number;
+  rokStudiow?: number;
 }
 
 export interface LoginInput {
@@ -76,6 +84,20 @@ export class AuthService {
     const user = await userRepository.create(createInput);
 
     console.log('Register - created user:', user.id, 'role input:', parsed.data.role);
+
+    // Insert into studenci or prowadzacy based on role
+    const isTeacher = normalizedRole === 'teacher';
+    if (isTeacher && parsed.data.wydzialId) {
+      await pool.query(
+        'INSERT INTO public.prowadzacy (prowadzacy_id, wydzial_id, status) VALUES ($1, $2, $3)',
+        [user.id, parsed.data.wydzialId, 'aktywny']
+      );
+    } else if (!isTeacher) {
+      await pool.query(
+        'INSERT INTO public.studenci (student_id, wydzial_id, kierunek_id, specjalizacja_id, rok_studiow, status) VALUES ($1, $2, $3, $4, $5, $6)',
+        [user.id, parsed.data.wydzialId, parsed.data.kierunekId, parsed.data.specjalizacjaId, parsed.data.rokStudiow || 1, 'aktywny']
+      );
+    }
 
     const userRoles = await userRepository.getUserRoles(user.id);
     console.log('User roles:', userRoles);
