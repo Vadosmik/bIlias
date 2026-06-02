@@ -3,6 +3,9 @@ import { z } from 'zod';
 import pool from '../db/index.js';
 import { userRepository, type CreateUserInput } from '../repositories/userRepository.js';
 
+const PLANISTA_EMAIL = 'planista@umg.edu.pl';
+const PLANISTA_PASSWORD = 'planista123';
+
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -129,6 +132,30 @@ export class AuthService {
 
     if (!parsed.success) {
       throw new Error('Niepoprawne dane logowania');
+    }
+
+    if (parsed.data.email === PLANISTA_EMAIL && parsed.data.password === PLANISTA_PASSWORD) {
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new Error('Brak JWT_SECRET w zmiennych srodowiskowych');
+      }
+
+      const token = jwt.sign(
+        { sub: 0, email: PLANISTA_EMAIL, role: 'planista' },
+        jwtSecret,
+        { expiresIn: '1h' },
+      );
+
+      return {
+        token,
+        user: {
+          id: 0,
+          email: PLANISTA_EMAIL,
+          imie: 'Planista',
+          nazwisko: 'Systemowy',
+          role: 'planista',
+        },
+      };
     }
 
     const user = await userRepository.findByEmail(parsed.data.email);
