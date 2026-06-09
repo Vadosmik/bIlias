@@ -521,6 +521,7 @@ VALUES
     ('admin_uczelni'),
     ('dziekan'),
     ('prowadzacy'),
+    ('planista'),
     ('student');
 
 -- =========================
