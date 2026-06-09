@@ -32,7 +32,20 @@ materialRoutes.get('/materials/:id/download', (req: Request, res: Response) => {
   materialController.download(req, res);
 });
 
-// New routes for material/task management
+// New routes for folder management
+materialRoutes.post('/courses/:kursId/folders', (req: Request, res: Response) => {
+  materialController.createFolder(req, res);
+});
+
+materialRoutes.patch('/folders/:id', (req: Request, res: Response) => {
+  materialController.updateFolder(req, res);
+});
+
+materialRoutes.delete('/folders/:id', (req: Request, res: Response) => {
+  materialController.deleteFolder(req, res);
+});
+
+// Routes for material/task management
 materialRoutes.patch('/materials/:id', (req: Request, res: Response) => {
   materialController.updateMaterial(req, res);
 });
@@ -47,14 +60,6 @@ materialRoutes.patch('/tasks/:id', (req: Request, res: Response) => {
 
 materialRoutes.delete('/tasks/:id', (req: Request, res: Response) => {
   materialController.deleteTask(req, res);
-});
-
-materialRoutes.patch('/courses/:kursId/folders', (req: Request, res: Response) => {
-  materialController.renameFolder(req, res);
-});
-
-materialRoutes.delete('/courses/:kursId/folders', (req: Request, res: Response) => {
-  materialController.deleteFolder(req, res);
 });
 
 export { materialRoutes };

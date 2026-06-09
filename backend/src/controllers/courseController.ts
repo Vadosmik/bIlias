@@ -8,57 +8,62 @@ export class CourseController {
     try {
       const userId = req.query.userId ? Number(req.query.userId) : undefined;
       const courses = await courseService.getAllCourses(userId);
-
       res.status(200).json({
         success: true,
         data: courses,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Blad pobierania kursow';
       res.status(500).json({
         success: false,
-        error: message,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas pobierania kursów',
       });
     }
   }
 
-  public async getMyCourses(req: Request, res: Response): Promise<void> {
+  public async getMy(req: Request, res: Response): Promise<void> {
     try {
       const userId = Number(req.query.userId);
       if (!userId) {
-        res.status(400).json({ success: false, error: 'Brak userId' });
+        res.status(400).json({ success: false, error: 'Brak ID użytkownika' });
         return;
       }
 
       const courses = await courseService.getUserCourses(userId);
-
       res.status(200).json({
         success: true,
         data: courses,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Blad pobierania kursow';
       res.status(500).json({
         success: false,
-        error: message,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas pobierania Twoich kursów',
       });
     }
   }
 
   public async getById(req: Request, res: Response): Promise<void> {
     try {
-      const courseId = Number(req.params.id);
+      const id = Number(req.params.id);
       const userId = req.query.userId ? Number(req.query.userId) : undefined;
 
-      if (!courseId) {
-        res.status(400).json({ success: false, error: 'Nieprawidlowe ID kursu' });
+      if (!id) {
+        res
+          .status(400)
+          .json({ success: false, error: 'Nieprawidłowe ID kursu' });
         return;
       }
 
-      const course = await courseService.getCourseById(courseId, userId);
-
+      const course = await courseService.getCourseById(id, userId);
       if (!course) {
-        res.status(404).json({ success: false, error: 'Kurs nie znaleziony' });
+        res
+          .status(404)
+          .json({ success: false, error: 'Kurs nie został znaleziony' });
         return;
       }
 
@@ -67,10 +72,12 @@ export class CourseController {
         data: course,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Blad pobierania kursu';
       res.status(500).json({
         success: false,
-        error: message,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas pobierania szczegółów kursu',
       });
     }
   }
@@ -81,21 +88,52 @@ export class CourseController {
       const userId = Number(req.body.userId);
 
       if (!courseId || !userId) {
-        res.status(400).json({ success: false, error: 'Brak wymaganych danych' });
+        res
+          .status(400)
+          .json({ success: false, error: 'Brakujące dane zapisu' });
         return;
       }
 
-      const result = await courseService.joinCourse(courseId, userId);
-
-      res.status(result.success ? 200 : 400).json({
-        success: result.success,
-        message: result.message,
+      await courseService.joinCourse(courseId, userId);
+      res.status(200).json({
+        success: true,
+        message: 'Zostałeś zapisany na kurs',
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Blad zapisu na kurs';
-      res.status(500).json({
+      res.status(400).json({
         success: false,
-        error: message,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas zapisywania na kurs',
+      });
+    }
+  }
+
+  public async leave(req: Request, res: Response): Promise<void> {
+    try {
+      const courseId = Number(req.params.id);
+      const userId = Number(req.body.userId);
+
+      if (!courseId || !userId) {
+        res
+          .status(400)
+          .json({ success: false, error: 'Brakujące dane wypisu' });
+        return;
+      }
+
+      await courseService.leaveCourse(courseId, userId);
+      res.status(200).json({
+        success: true,
+        message: 'Zostałeś wypisany z kursu',
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Błąd podczas wypisywania z kursu',
       });
     }
   }

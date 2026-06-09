@@ -29,7 +29,8 @@ export default function RegisterPage() {
 		e.preventDefault();
 		setError(null);
 
-		const emailRegex = /^[a-zA-Z0-9.]+@[a-zA-Z.]*umg\.edu\.pl$/;
+		const cleanEmail = email.trim().toLowerCase();
+		const emailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)*umg\.edu\.pl$/;
 		const nameRegex = /^[A-Za-zżźćńółęąśŻŹĆŃÓŁĘĄŚ]{3,}$/;
 		const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -43,7 +44,7 @@ export default function RegisterPage() {
 			return;
 		}
 
-		if (!emailRegex.test(email)) {
+		if (!emailRegex.test(cleanEmail)) {
 			setError('Użyj oficjalnego maila UMG (@umg.edu.pl)');
 			return;
 		}
@@ -60,9 +61,9 @@ export default function RegisterPage() {
 		setLoading(true);
 
 		try {
-			const roleToSend = role === 'wykladowca' ? 'teacher' : 'student';
+			const roleToSend = role === 'wykladowca' ? 'prowadzacy' : 'student';
 			await api.auth.register({
-				email,
+				email: cleanEmail,
 				password,
 				imie: firstName,
 				nazwisko: lastName,

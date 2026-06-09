@@ -44,10 +44,13 @@ export interface Course {
 	description?: string;
 	ects?: number;
 	materials?: Material[];
+	materialsCount?: number;
+	pendingTasks?: Material[];
 }
 
 export interface Material {
 	id: string | number;
+	dbId?: number; // Backend database ID
 	type: 'folder' | 'file' | 'task';
 	name: string;
 	format?: string;
@@ -111,6 +114,46 @@ export const api = {
 			});
 			return true;
 		},
+		leave: async (courseId: number, userId: number): Promise<boolean> => {
+			await request(`/courses/${courseId}/leave`, {
+				method: 'POST',
+				body: JSON.stringify({ userId }),
+			});
+			return true;
+		},
+	},
+	tasks: {
+		create: async (
+			courseId: number,
+			data: { title: string; description: string; deadline: string; folderId?: number },
+		): Promise<any> => {
+			return request(`/courses/${courseId}/tasks`, {
+				method: 'POST',
+				body: JSON.stringify(data),
+			});
+		},
+		update: async (
+			taskId: string | number,
+			data: { title?: string; description?: string; deadline?: string; folderId?: number | null },
+		): Promise<void> => {
+			const id =
+				typeof taskId === 'string' && taskId.startsWith('t-')
+					? taskId.substring(2)
+					: taskId;
+			await request(`/tasks/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			});
+		},
+		delete: async (taskId: string | number): Promise<void> => {
+			const id =
+				typeof taskId === 'string' && taskId.startsWith('t-')
+					? taskId.substring(2)
+					: taskId;
+			await request(`/tasks/${id}`, {
+				method: 'DELETE',
+			});
+		},
 	},
 	tasks: {
 		create: async (
@@ -152,13 +195,13 @@ export const api = {
 		upload: async (
 			courseId: number,
 			files: File[],
-			folderName?: string,
+			folderId?: number,
 		): Promise<Material[]> => {
 			const formData = new FormData();
 			files.forEach(file => {
 				formData.append('files', file);
 			});
-			if (folderName) formData.append('folderName', folderName);
+			if (folderId) formData.append('folderId', folderId.toString());
 
 			return request<Material[]>(`/courses/${courseId}/materials`, {
 				method: 'POST',
@@ -167,7 +210,7 @@ export const api = {
 		},
 		update: async (
 			materialId: string | number,
-			data: { name?: string; folderName?: string },
+			data: { name?: string; folderId?: number | null },
 		): Promise<void> => {
 			const id =
 				typeof materialId === 'string' && materialId.startsWith('m-')
@@ -187,26 +230,31 @@ export const api = {
 				method: 'DELETE',
 			});
 		},
-		renameFolder: async (
+		createFolder: async (
 			courseId: number,
-			oldName: string,
-			newName: string,
+			nazwa: string,
+			parentId?: number,
 		): Promise<void> => {
 			await request(`/courses/${courseId}/folders`, {
+				method: 'POST',
+				body: JSON.stringify({ nazwa, parentId }),
+			});
+		},
+		renameFolder: async (
+			folderId: number,
+			newName: string,
+		): Promise<void> => {
+			await request(`/folders/${folderId}`, {
 				method: 'PATCH',
-				body: JSON.stringify({ oldName, newName }),
+				body: JSON.stringify({ nazwa: newName }),
 			});
 		},
 		deleteFolder: async (
-			courseId: number,
-			folderName: string,
+			folderId: number,
 		): Promise<void> => {
-			await request(
-				`/courses/${courseId}/folders?folderName=${encodeURIComponent(folderName)}`,
-				{
-					method: 'DELETE',
-				},
-			);
+			await request(`/folders/${folderId}`, {
+				method: 'DELETE',
+			});
 		},
 		download: async (materialId: string | number): Promise<void> => {
 			// Stripping 'm-' prefix if present from string IDs

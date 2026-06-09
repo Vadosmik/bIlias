@@ -20,7 +20,7 @@ export default function LoginPage() {
 		e.preventDefault();
 		setError(null);
 
-		const emailRegex = /^[a-zA-Z0-9.]+@[a-zA-Z.]*umg\.edu\.pl$/;
+		const emailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)*umg\.edu\.pl$/;
 		console.log(!emailRegex.test(email));
 		if (!emailRegex.test(email)) {
 			setError('Wprowadź poprawny adres e-mail (np. twoj.mail@umg.edu.pl)');
@@ -30,8 +30,7 @@ export default function LoginPage() {
 		setLoading(true);
 
 		try {
-			const user = await api.auth.login(email, password);
-			login(email, user.role);
+			await login(email, password);
 			router.push('/dashboard');
 		} catch (err) {
 			setError(

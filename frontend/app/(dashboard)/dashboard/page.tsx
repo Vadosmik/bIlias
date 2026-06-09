@@ -16,43 +16,51 @@ export default function DashboardPage() {
 	const [allTasks, setAllTasks] = useState<
 		(Material & { courseName: string; courseId: number })[]
 	>([]);
-	const isLecturer = user?.role === 'teacher';
+	const isLecturer = user?.role === 'prowadzacy';
 
 	useEffect(() => {
+		const abortController = new AbortController();
+
 		const fetchCourses = async () => {
-			if (user) {
+			if (!user) return;
+			
+			try {
 				const data = await api.courses.getUserCourses(user.id);
+				
+				if (abortController.signal.aborted) return;
 
-				//data+materials
-				const courseWithMaterials = await Promise.all(
-					data.map(async course => {
-						const materials = await api.materials.getByCourseId(course.id);
+				setCourses(data);
 
-						return { ...course, materials };
-					}),
-				);
-				setCourses(courseWithMaterials);
-
-				// To narazie nie działa, porzucone z względu na małą ilość czasu
-				const tasks: (Material & { courseName: string; courseId: number })[] =
-					[];
-				courseWithMaterials.forEach(course => {
-					course.materials?.forEach(m => {
-						if (m.type === 'task') {
+				// Optimized: Tasks are now provided directly by the backend
+				const tasks: (Material & { courseName: string; courseId: number })[] = [];
+				data.forEach(course => {
+					if (course.pendingTasks) {
+						course.pendingTasks.forEach(task => {
 							tasks.push({
-								...m,
+								...task,
 								courseName: course.name,
 								courseId: course.id,
 							});
-						}
-					});
+						});
+					}
 				});
+				
 				setAllTasks(tasks);
 				setIsLoading(false);
+			} catch (err) {
+				if (!abortController.signal.aborted) {
+					console.error('Failed to fetch dashboard data:', err);
+					setIsLoading(false);
+				}
 			}
 		};
+
 		fetchCourses();
-	}, [user]);
+
+		return () => {
+			abortController.abort();
+		};
+	}, [user?.id]);
 
 	if (isLoading) {
 		return (
@@ -182,7 +190,7 @@ export default function DashboardPage() {
 								<div className='mt-auto pt-6 border-t border-brand-gray/5'>
 									<div className='flex items-center justify-between text-xs'>
 										<span className='font-medium text-muted-foreground'>
-											{course.materials?.length || 0} materiałów
+											{course.materialsCount || 0} materiałów
 										</span>
 									</div>
 								</div>

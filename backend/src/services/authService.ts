@@ -9,6 +9,9 @@ const registerSchema = z.object({
   imie: z.string().min(1),
   nazwisko: z.string().min(1),
   role: z.string().optional(),
+  wydzialId: z.number().optional(),
+  kierunekId: z.number().optional(),
+  specjalizacjaId: z.number().optional(),
 });
 
 const loginSchema = z.object({
@@ -22,6 +25,9 @@ export interface RegisterInput {
   imie: string;
   nazwisko: string;
   role?: string;
+  wydzialId?: number;
+  kierunekId?: number;
+  specjalizacjaId?: number;
 }
 
 export interface LoginInput {
@@ -37,7 +43,6 @@ export interface AuthResult {
     imie: string;
     nazwisko: string;
     role: string;
-    organizacja_id: number | null;
   };
 }
 
@@ -46,7 +51,7 @@ export class AuthService {
     const parsed = registerSchema.safeParse(input);
 
     if (!parsed.success) {
-      throw new Error('Niepoprawne dane rejestracji: ' + parsed.error.errors.map(e => e.message).join(', '));
+      throw new Error('Niepoprawne dane rejestracji: ' + parsed.error.issues.map((e: any) => e.message).join(', '));
     }
 
     const { email, role } = parsed.data;
@@ -71,23 +76,25 @@ export class AuthService {
       password: parsed.data.password,
       imie: parsed.data.imie,
       nazwisko: parsed.data.nazwisko,
-      role: normalizedRole,
+      role: parsed.data.role,
     };
 
     const user = await userRepository.create(createInput);
 
     console.log('Register - created user:', user.id, 'role input:', parsed.data.role);
 
-    if (parsed.data.role) {
-      const roleQuery = await pool.query('SELECT id FROM role WHERE nazwa = $1', [parsed.data.role]);
-      console.log('Role query result:', roleQuery.rows);
-      if (roleQuery.rows.length > 0) {
-        const insertResult = await pool.query(
-          'INSERT INTO uzytkownik_role (user_id, role_id) VALUES ($1, $2)',
-          [user.id, roleQuery.rows[0].id]
-        );
-        console.log('Insert result:', insertResult.rows);
-      }
+    // Insert into studenci or prowadzacy based on role
+    const isTeacher = normalizedRole === 'teacher';
+    if (isTeacher && parsed.data.wydzialId) {
+      await pool.query(
+        'INSERT INTO public.prowadzacy (prowadzacy_id, wydzial_id, status) VALUES ($1, $2, $3)',
+        [user.id, parsed.data.wydzialId, 'aktywny']
+      );
+    } else if (!isTeacher) {
+      await pool.query(
+        'INSERT INTO public.studenci (student_id, wydzial_id, kierunek_id, specjalizacja_id, status) VALUES ($1, $2, $3, $4, $5)',
+        [user.id, parsed.data.wydzialId, parsed.data.kierunekId, parsed.data.specjalizacjaId, 'aktywny']
+      );
     }
 
     const userRoles = await userRepository.getUserRoles(user.id);
@@ -112,8 +119,7 @@ export class AuthService {
         email: user.email,
         imie: user.imie,
         nazwisko: user.nazwisko,
-        role: userRole,
-        organizacja_id: user.organizacja_id,
+        role: parsed.data.role || 'student',
       },
     };
   }
@@ -162,9 +168,8 @@ export class AuthService {
         email: user.email,
         imie: user.imie,
         nazwisko: user.nazwisko,
-        role: userRole,
-        organizacja_id: user.organizacja_id,
+        role: user.role,
       },
     };
-  }
-}
+    }
+    }

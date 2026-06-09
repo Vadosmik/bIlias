@@ -3,7 +3,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 
-export type UserRole = 'student' | 'teacher' | 'admin';
+export type UserRole =
+	| 'student'
+	| 'admin_uczelni'
+	| 'dziekan'
+	| 'prowadzacy'
+	| 'super_admin';
 
 interface User {
 	id: number;
@@ -18,7 +23,7 @@ interface User {
 interface AuthContextType {
 	user: User | null;
 	isLoading: boolean;
-	login: (email: string, role: UserRole) => void;
+	login: (email: string, password: string) => Promise<void>;
 	logout: () => void;
 }
 
@@ -29,44 +34,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		const stored = localStorage.getItem('user');
-		if (stored) {
-			try {
-				const parsed = JSON.parse(stored);
-				setUser({
-					...parsed,
-					firstName: parsed.imie,
-					lastName: parsed.nazwisko,
-				});
-			} catch {
-				localStorage.removeItem('user');
-				localStorage.removeItem('token');
-			}
+		const storedUser = localStorage.getItem('user');
+		const token = localStorage.getItem('token');
+
+		if (storedUser && token) {
+			const parsedUser = JSON.parse(storedUser);
+			setUser({
+				id: parsedUser.id,
+				firstName: parsedUser.imie || parsedUser.firstName,
+				lastName: parsedUser.nazwisko || parsedUser.lastName,
+				email: parsedUser.email,
+				role: parsedUser.role || 'student',
+				department: parsedUser.department,
+				semester: parsedUser.semester,
+			});
 		}
 		setIsLoading(false);
 	}, []);
 
-	const login = (email: string, role: UserRole) => {
-		const stored = localStorage.getItem('user');
-		if (stored) {
-			try {
-				const parsed = JSON.parse(stored);
-				setUser({
-					...parsed,
-					firstName: parsed.imie,
-					lastName: parsed.nazwisko,
-				});
-				return;
-			} catch {}
-		}
+	const login = async (email: string, password: string) => {
+		const userData = await api.auth.login(email, password);
 		setUser({
-			id: 0,
-			firstName: role === 'teacher' ? 'Dr inż. Adam' : 'Jan',
-			lastName: role === 'teacher' ? 'Nowak' : 'Kowalski',
-			email,
-			role,
-			department: 'Wydział Elektryczny',
-			semester: role === 'student' ? 6 : undefined,
+			id: userData.id,
+			firstName: userData.imie,
+			lastName: userData.nazwisko,
+			email: userData.email,
+			role: userData.role || 'student',
+			department: userData.department,
+			semester: userData.semester,
 		});
 	};
 
