@@ -49,8 +49,8 @@ export const userRepository = {
   async create(input: CreateUserInput): Promise<User> {
     const hash = await bcrypt.hash(input.password, 10);
     const result = await pool.query(
-      `INSERT INTO uzytkownicy (email, hash_hasla, imie, nazwisko, organizacja_id)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO uzytkownicy (email, hash_hasla, imie, nazwisko, organizacja_id, ustawienia_dashboard)
+       VALUES ($1, $2, $3, $4, $5, '11111')
        RETURNING *`,
       [input.email, hash, input.imie, input.nazwisko, input.organizacja_id || null]
     );

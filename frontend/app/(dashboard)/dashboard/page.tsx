@@ -68,66 +68,70 @@ export default function DashboardPage() {
 					});
 				}
 
-				if (profileData && profileData.academic) {
-					const ac = profileData.academic;
-					if (ac.wydzial_id && ac.kierunek_id) {
-						api.timetable
-							.getAll({
-								wydzialId: ac.wydzial_id,
-								kierunekId: ac.kierunek_id,
-								specjalizacjaId: ac.specjalizacja_id || '',
-							})
-							.then(data => {
-								if (abortController.signal.aborted) return;
+				const isTeacher = user.role === 'prowadzacy' || user.role === 'teacher';
+				let timetableFilters: any = null;
+				
+				if (isTeacher) {
+					timetableFilters = { prowadzacyId: user.id.toString() };
+				} else if (profileData?.academic?.wydzial_id && profileData?.academic?.kierunek_id) {
+					timetableFilters = {
+						wydzialId: profileData.academic.wydzial_id.toString(),
+						kierunekId: profileData.academic.kierunek_id.toString(),
+						specjalizacjaId: profileData.academic.specjalizacja_id ? profileData.academic.specjalizacja_id.toString() : ''
+					};
+				}
 
-								const todayId = new Date().getDay(); // 1 = Mon, 5 = Fri
-								if (todayId >= 1 && todayId <= 5) {
-									const mapped = data
-										.filter((t: any) => t.dzienId === todayId)
-										.map((entry: any) => {
-											// format from backend is 'HH:MM:SS' or number
-											const startParts =
-												typeof entry.godzinaOd === 'string'
-													? entry.godzinaOd.split(':')
-													: ['00', '00'];
-											const endParts =
-												typeof entry.godzinaDo === 'string'
-													? entry.godzinaDo.split(':')
-													: ['00', '00'];
-											return {
-												id: entry.id,
-												subject: entry.kurs?.nazwa || 'Nieznany przedmiot',
-												type: entry.typZajec,
-												room: entry.sala ? `${entry.sala.numer}` : 'Brak sali',
-												instructor: entry.prowadzacy
-													? `${entry.prowadzacy.imie} ${entry.prowadzacy.nazwisko}`
-													: 'Brak prowadzącego',
-												startHour: `${startParts[0]}:${startParts[1]}`,
-												endHour: `${endParts[0]}:${endParts[1]}`,
-												sortVal:
-													parseInt(startParts[0]) * 60 +
-													parseInt(startParts[1]),
-												color:
-													entry.typZajec === 'laboratorium'
-														? 'language'
-														: entry.typZajec === 'wyklad'
-															? 'blue'
-															: 'default',
-											};
-										})
-										.sort((a: any, b: any) => a.sortVal - b.sortVal);
+				if (timetableFilters) {
+					api.timetable
+						.getAll(timetableFilters)
+						.then(data => {
+							if (abortController.signal.aborted) return;
 
-									setTodayTimetable(mapped);
-								}
-								setIsTimetableLoading(false);
-							})
-							.catch(err => {
-								console.error('Failed to load timetable:', err);
-								setIsTimetableLoading(false);
-							});
-					} else {
-						setIsTimetableLoading(false);
-					}
+							const todayId = new Date().getDay(); // 1 = Mon, 5 = Fri
+							if (todayId >= 1 && todayId <= 5) {
+								const mapped = data
+									.filter((t: any) => t.dzienId === todayId)
+									.map((entry: any) => {
+										// format from backend is 'HH:MM:SS' or number
+										const startParts =
+											typeof entry.godzinaOd === 'string'
+												? entry.godzinaOd.split(':')
+												: ['00', '00'];
+										const endParts =
+											typeof entry.godzinaDo === 'string'
+												? entry.godzinaDo.split(':')
+												: ['00', '00'];
+										return {
+											id: entry.id,
+											subject: entry.kurs?.nazwa || 'Nieznany przedmiot',
+											type: entry.typZajec,
+											room: entry.sala ? `${entry.sala.numer}` : 'Brak sali',
+											instructor: entry.prowadzacy
+												? `${entry.prowadzacy.imie} ${entry.prowadzacy.nazwisko}`
+												: 'Brak prowadzącego',
+											startHour: `${startParts[0]}:${startParts[1]}`,
+											endHour: `${endParts[0]}:${endParts[1]}`,
+											sortVal:
+												parseInt(startParts[0]) * 60 +
+												parseInt(startParts[1]),
+											color:
+												entry.typZajec === 'laboratorium'
+													? 'language'
+													: entry.typZajec === 'wyklad'
+														? 'blue'
+														: 'default',
+										};
+									})
+									.sort((a: any, b: any) => a.sortVal - b.sortVal);
+
+								setTodayTimetable(mapped);
+							}
+							setIsTimetableLoading(false);
+						})
+						.catch(err => {
+							console.error('Failed to load timetable:', err);
+							setIsTimetableLoading(false);
+						});
 				} else {
 					setIsTimetableLoading(false);
 				}
