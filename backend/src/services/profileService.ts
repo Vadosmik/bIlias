@@ -53,6 +53,10 @@ export class ProfileService {
     await userRepository.updateLecturerProfile(userId, input);
   }
 
+  public async updateDashboardSettings(userId: number, settings: string): Promise<void> {
+    await userRepository.updateDashboardSettings(userId, settings);
+  }
+
   public async changePassword(input: ChangePasswordInput): Promise<void> {
     if (input.newPassword !== input.confirmPassword) {
       throw new Error('Nowe hasla nie sa identyczne');
@@ -86,5 +90,9 @@ export class ProfileService {
 
   public async getProfileCompleteness(userId: number): Promise<ProfileCompleteness> {
     return userRepository.getProfileCompleteness(userId);
+  }
+
+  public async getFullProfile(userId: number) {
+    return userRepository.getFullProfile(userId);
   }
 }

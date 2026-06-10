@@ -77,6 +77,9 @@ export const api = {
 			imie: string;
 			nazwisko: string;
 			role?: string;
+			wydzialId?: number;
+			kierunekId?: number;
+			specjalizacjaId?: number;
 		}) => {
 			const data = await request<{ token: string; user: any }>(
 				'/auth/register',
@@ -120,39 +123,6 @@ export const api = {
 				body: JSON.stringify({ userId }),
 			});
 			return true;
-		},
-	},
-	tasks: {
-		create: async (
-			courseId: number,
-			data: { title: string; description: string; deadline: string; folderId?: number },
-		): Promise<any> => {
-			return request(`/courses/${courseId}/tasks`, {
-				method: 'POST',
-				body: JSON.stringify(data),
-			});
-		},
-		update: async (
-			taskId: string | number,
-			data: { title?: string; description?: string; deadline?: string; folderId?: number | null },
-		): Promise<void> => {
-			const id =
-				typeof taskId === 'string' && taskId.startsWith('t-')
-					? taskId.substring(2)
-					: taskId;
-			await request(`/tasks/${id}`, {
-				method: 'PATCH',
-				body: JSON.stringify(data),
-			});
-		},
-		delete: async (taskId: string | number): Promise<void> => {
-			const id =
-				typeof taskId === 'string' && taskId.startsWith('t-')
-					? taskId.substring(2)
-					: taskId;
-			await request(`/tasks/${id}`, {
-				method: 'DELETE',
-			});
 		},
 	},
 	tasks: {
@@ -335,6 +305,52 @@ export const api = {
 				? taskId.substring(2) 
 				: taskId;
 			return request<any[]>(`/submissions/task/${id}`);
+		},
+	},
+	profile: {
+		get: async (userId: number): Promise<any> => {
+			return request(`/users/${userId}/profile`);
+		},
+		update: async (userId: number, data: any): Promise<void> => {
+			await request(`/users/${userId}/profile`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			});
+		},
+		changePassword: async (data: any): Promise<void> => {
+			await request('/profile/password', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			});
+		},
+	},
+	dictionaries: {
+		getDepartments: async (): Promise<any[]> => {
+			return request<any[]>('/dictionaries/departments');
+		},
+		getCourses: async (departmentId: number): Promise<any[]> => {
+			return request<any[]>(`/dictionaries/departments/${departmentId}/courses`);
+		},
+		getSpecializations: async (courseId: number): Promise<any[]> => {
+			return request<any[]>(`/dictionaries/courses/${courseId}/specializations`);
+		},
+		getRooms: async (): Promise<any[]> => {
+			return request<any[]>('/dictionaries/rooms');
+		},
+		getInstructors: async (): Promise<any[]> => {
+			return request<any[]>('/dictionaries/instructors');
+		},
+	},
+	timetable: {
+		getAll: async (params: any): Promise<any[]> => {
+			const query = new URLSearchParams();
+			Object.entries(params).forEach(([key, val]) => {
+				if (val) query.append(key, val.toString());
+			});
+			return request<any[]>(`/timetable?${query.toString()}`);
+		},
+		getGrid: async (): Promise<any> => {
+			return request<any>('/timetable/grid');
 		},
 	},
 };

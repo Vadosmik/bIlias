@@ -553,25 +553,25 @@ INSERT INTO public.kierunki (
 )
 VALUES
     (
-        (SELECT id FROM public.wydzialy WHERE skrot = 'we'),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1),
         'Elektrotechnika',
         'inzynier',
         'stacjonarne'
     ),
     (
-        (SELECT id FROM public.wydzialy WHERE skrot = 'we'),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1),
         'Automatyka i Robotyka',
         'inzynier',
         'stacjonarne'
     ),
     (
-        (SELECT id FROM public.wydzialy WHERE skrot = 'wi'),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1),
         'Informatyka',
         'inzynier',
         'stacjonarne'
     ),
     (
-        (SELECT id FROM public.wydzialy WHERE skrot = 'wi'),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1),
         'Cyberbezpieczenstwo',
         'inzynier',
         'stacjonarne'
@@ -589,25 +589,25 @@ INSERT INTO public.specjalizacje (
 )
 VALUES
     (
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka'),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1),
         'Aplikacje Internetowe i Mobilne',
         5,
         7
     ),
     (
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka'),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1),
         'Aplikacje Internetu Rzeczy',
         5,
         7
     ),
     (
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Cyberbezpieczenstwo'),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Cyberbezpieczenstwo' LIMIT 1),
         'Bezpieczenstwo Sieci',
         5,
         7
     ),
     (
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika'),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1),
         'Systemy Okretowe',
         5,
         7
@@ -663,23 +663,23 @@ INSERT INTO public.prowadzacy (
 )
 VALUES
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'wi'),
+        (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1),
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'wi'),
+        (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1),
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'we'),
+        (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1),
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'we'),
+        (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1),
         'aktywny'
     );
 
@@ -719,72 +719,72 @@ INSERT INTO public.studenci (
 )
 VALUES
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = '10001@student.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'wi'),
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka'),
-        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne'),
+        (SELECT id FROM public.uzytkownicy WHERE email = '10001@student.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1),
+        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1),
         2,
         '10001',
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = '10002@student.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'wi'),
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka'),
-        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne'),
+        (SELECT id FROM public.uzytkownicy WHERE email = '10002@student.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1),
+        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1),
         3,
         '10002',
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = '10003@student.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'wi'),
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Cyberbezpieczenstwo'),
-        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Bezpieczenstwo Sieci'),
+        (SELECT id FROM public.uzytkownicy WHERE email = '10003@student.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Cyberbezpieczenstwo' LIMIT 1),
+        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Bezpieczenstwo Sieci' LIMIT 1),
         2,
         '10003',
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = '10004@student.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'wi'),
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Cyberbezpieczenstwo'),
-        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Bezpieczenstwo Sieci'),
+        (SELECT id FROM public.uzytkownicy WHERE email = '10004@student.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Cyberbezpieczenstwo' LIMIT 1),
+        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Bezpieczenstwo Sieci' LIMIT 1),
         1,
         '10004',
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = '10005@student.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'we'),
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika'),
-        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe'),
+        (SELECT id FROM public.uzytkownicy WHERE email = '10005@student.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1),
+        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1),
         3,
         '10005',
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = '10006@student.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'we'),
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika'),
-        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe'),
+        (SELECT id FROM public.uzytkownicy WHERE email = '10006@student.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1),
+        (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1),
         2,
         '10006',
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = '10007@student.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'we'),
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Automatyka i Robotyka'),
+        (SELECT id FROM public.uzytkownicy WHERE email = '10007@student.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Automatyka i Robotyka' LIMIT 1),
         NULL,
         1,
         '10007',
         'aktywny'
     ),
     (
-        (SELECT id FROM public.uzytkownicy WHERE email = '10008@student.umg.edu.pl'),
-        (SELECT id FROM public.wydzialy WHERE skrot = 'we'),
-        (SELECT id FROM public.kierunki WHERE nazwa = 'Automatyka i Robotyka'),
+        (SELECT id FROM public.uzytkownicy WHERE email = '10008@student.umg.edu.pl' LIMIT 1),
+        (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1),
+        (SELECT id FROM public.kierunki WHERE nazwa = 'Automatyka i Robotyka' LIMIT 1),
         NULL,
         1,
         '10008',
@@ -824,45 +824,70 @@ INSERT INTO public.kursy (
 )
 VALUES
     (
-        1,
+        (SELECT id FROM public.organizacje LIMIT 1),
         'Programowanie w Java',
         'Podstawy programowania obiektowego w Java',
         5,
-        (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium'),
+        (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium' LIMIT 1),
         3,
         2025,
         2026
     ),
     (
-        1,
+        (SELECT id FROM public.organizacje LIMIT 1),
         'Bazy Danych',
         'Projektowanie i administracja bazami danych PostgreSQL',
         6,
-        (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad'),
+        (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1),
         4,
         2025,
         2026
     ),
     (
-        1,
+        (SELECT id FROM public.organizacje LIMIT 1),
         'Systemy Wbudowane',
         'Architektura i programowanie systemow wbudowanych',
         5,
-        (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium'),
+        (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium' LIMIT 1),
         5,
         2025,
         2026
     ),
     (
-        1,
+        (SELECT id FROM public.organizacje LIMIT 1),
         'Sieci Komputerowe',
         'Podstawy konfiguracji i administracji sieciami',
         4,
-        (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'cwiczenia'),
+        (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'cwiczenia' LIMIT 1),
         3,
         2025,
         2026
-    );
+    ),
+    -- Dodatkowe przedmioty: Informatyka
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Inżynieria Oprogramowania', 'Metodologie prowadzenia projektów IT', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Grafika Komputerowa', 'Przetwarzanie obrazów i OpenGL', 3, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Administracja Serwerami', 'Zarządzanie systemami Linux/Unix', 3, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Chmury Obliczeniowe', 'Architektura AWS i Docker', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'projekt' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Sztuczna Inteligencja', 'Podstawy algorytmów ML i sieci neuronowych', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1), 5, 2025, 2026),
+    
+    -- Dodatkowe przedmioty: Elektrotechnika
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Energetyka Odnawialna', 'Farmy wiatrowe i fotowoltaika na morzu', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Napędy Hybrydowe', 'Skojarzone systemy napędowe', 3, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'projekt' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Instalacje Elektryczne', 'Projektowanie sieci strukturalnych', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'projekt' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Teoria Sterowania', 'Matematyczne podstawy automatyki', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'cwiczenia' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Elektronika Mocy', 'Układy przekształtnikowe wielkiej mocy', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Mikrokontrolery w Architekturze Okrętowej', 'Programowanie układów ARM', 3, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Seminarium Dyplomowe', 'Przygotowanie do obrony pracy inżynierskiej', 2, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'seminarium' LIMIT 1), 5, 2025, 2026),
+
+    -- Brakujące przedmioty referencjonowane w planie zajęć
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Programowanie Aplikacji Webowych', 'Tworzenie aplikacji webowych w React i Node.js', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Prawo i Gospodarka', 'Podstawy prawa gospodarczego i cywilnego', 2, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Język angielski', 'Lektorat języka angielskiego B2+', 2, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'cwiczenia' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Maszyny Elektryczne (W)', 'Teoria maszyn elektrycznych - wykład', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Maszyny Elektryczne (L)', 'Teoria maszyn elektrycznych - laboratorium', 4, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'laboratorium' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Automatyka Okrętowa', 'Systemy automatyki na statkach', 3, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1), 5, 2025, 2026),
+    ((SELECT id FROM public.organizacje LIMIT 1), 'Projekt Układów Automatyki', 'Projektowanie systemów sterowania', 3, (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'projekt' LIMIT 1), 5, 2025, 2026);
+
 
 -- =========================
 -- ROLE KURSOWE
@@ -871,23 +896,23 @@ VALUES
 INSERT INTO public.kurs_role (kurs_id, user_id, role_id)
 VALUES
     (
-        (SELECT id FROM public.kursy WHERE nazwa = 'Programowanie w Java'),
-        (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl'),
+        (SELECT id FROM public.kursy WHERE nazwa = 'Programowanie w Java' LIMIT 1),
+        (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1),
         (SELECT id FROM public.role WHERE nazwa = 'prowadzacy')
     ),
     (
-        (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych'),
-        (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl'),
+        (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych' LIMIT 1),
+        (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl' LIMIT 1),
         (SELECT id FROM public.role WHERE nazwa = 'prowadzacy')
     ),
     (
-        (SELECT id FROM public.kursy WHERE nazwa = 'Systemy Wbudowane'),
-        (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl'),
+        (SELECT id FROM public.kursy WHERE nazwa = 'Systemy Wbudowane' LIMIT 1),
+        (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1),
         (SELECT id FROM public.role WHERE nazwa = 'prowadzacy')
     ),
     (
-        (SELECT id FROM public.kursy WHERE nazwa = 'Sieci Komputerowe'),
-        (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl'),
+        (SELECT id FROM public.kursy WHERE nazwa = 'Sieci Komputerowe' LIMIT 1),
+        (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl' LIMIT 1),
         (SELECT id FROM public.role WHERE nazwa = 'prowadzacy')
     );
 
@@ -920,9 +945,9 @@ WHERE u.email LIKE '%@student.umg.edu.pl'
 
 INSERT INTO public.foldery (kurs_id, nazwa)
 VALUES
-    ((SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych'), 'Laboratorium 1'),
-    ((SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych'), 'Laboratorium 2'),
-    ((SELECT id FROM public.kursy WHERE nazwa = 'Programowanie w Java'), 'Wykłady');
+    ((SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych' LIMIT 1), 'Laboratorium 1'),
+    ((SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych' LIMIT 1), 'Laboratorium 2'),
+    ((SELECT id FROM public.kursy WHERE nazwa = 'Programowanie w Java' LIMIT 1), 'Wykłady');
 
 -- =========================
 -- MATERIAŁY (SEED)
@@ -931,8 +956,8 @@ VALUES
 INSERT INTO public.materialy (kurs_id, folder_id, tytul, sciezka_pliku, typ_pliku_id, rozmiar, mime_type)
 VALUES
     (
-        (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych'),
-        (SELECT id FROM public.foldery WHERE nazwa = 'Laboratorium 1' AND kurs_id = (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych')),
+        (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych' LIMIT 1),
+        (SELECT id FROM public.foldery WHERE nazwa = 'Laboratorium 1' AND kurs_id = (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych' LIMIT 1)),
         'Instrukcja SQL',
         '/uploads/files-1778701675669-453520548.pdf',
         (SELECT id FROM public.typ_pliku_slownik WHERE nazwa = 'pdf'),
@@ -947,8 +972,8 @@ VALUES
 INSERT INTO public.zadania (kurs_id, folder_id, tytul, opis, typ_zadania_id, max_punkty, termin_oddania, status_id)
 VALUES
     (
-        (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych'),
-        (SELECT id FROM public.foldery WHERE nazwa = 'Laboratorium 1' AND kurs_id = (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych')),
+        (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych' LIMIT 1),
+        (SELECT id FROM public.foldery WHERE nazwa = 'Laboratorium 1' AND kurs_id = (SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych' LIMIT 1)),
         'Zadanie 1 - SELECT',
         'Podstawowe zapytania SELECT',
         (SELECT id FROM public.typ_zadania_slownik WHERE nazwa = 'projekt'),
@@ -976,5 +1001,151 @@ VALUES
     ('Hala Sportowa', 'S1', 100),
     ('Budynek Nawigacji', 'N14', 20),
     ('Budynek Nawigacji', 'N145', 12);
+
+-- ==========================
+-- PLAN ZAJĘĆ 
+-- ==========================
+
+BEGIN;
+
+-- =========================================================================
+-- PLAN 1: INFORMATYKA (Spec. Aplikacje Internetowe i Mobilne)
+-- Łącznie: Bardzo intensywny tydzień (zajęcia od rana do popołudnia)
+-- =========================================================================
+
+-- --- PONIEDZIAŁEK (7 GODZIN ZAJĘĆ) ---
+-- 08:00 - 11:00 (3h) | Inżynieria Oprogramowania | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Inżynieria Oprogramowania' AND typ_kursu_id = (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1) LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Poniedzialek' LIMIT 1), '08:00:00', '11:00:00', (SELECT id FROM public.sale WHERE numer = 'F110' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'wyklad');
+
+-- 11:15 - 13:15 (2h) | Inżynieria Oprogramowania | Projekt
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Inżynieria Oprogramowania' AND typ_kursu_id = (SELECT id FROM public.typ_kursu_slownik WHERE nazwa = 'wyklad' LIMIT 1) LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Poniedzialek' LIMIT 1), '11:15:00', '13:15:00', (SELECT id FROM public.sale WHERE numer = 'F112' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'projekt');
+
+-- 13:30 - 15:30 (2h) | Programowanie Aplikacji Webowych | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Programowanie Aplikacji Webowych' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Poniedzialek' LIMIT 1), '13:30:00', '15:30:00', (SELECT id FROM public.sale WHERE numer = 'F08' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'laboratorium');
+
+
+-- --- WTOREK (4 GODZINY ZAJĘĆ - LUŹNIEJSZY DZIEŃ) ---
+-- 08:15 - 10:15 (2h) | Grafika Komputerowa | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Grafika Komputerowa' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Wtorek' LIMIT 1), '08:15:00', '10:15:00', (SELECT id FROM public.sale WHERE numer = 'F67' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'wyklad');
+
+-- 10:30 - 12:30 (2h) | Grafika Komputerowa | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Grafika Komputerowa' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Wtorek' LIMIT 1), '10:30:00', '12:30:00', (SELECT id FROM public.sale WHERE numer = 'F08' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'laboratorium');
+
+
+-- --- ŚRODA (8 GODZIN ZAJĘĆ - MARATON) ---
+-- 08:00 - 10:00 (2h) | Bazy Danych | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Bazy Danych' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Sroda' LIMIT 1), '08:00:00', '10:00:00', (SELECT id FROM public.sale WHERE numer = 'B202' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'wyklad');
+
+-- 10:15 - 12:15 (2h) | Administracja Serwerami | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Administracja Serwerami' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Sroda' LIMIT 1), '10:15:00', '12:15:00', (SELECT id FROM public.sale WHERE numer = 'F112' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'laboratorium');
+
+-- 13:00 - 15:00 (2h) | Prawo i Gospodarka | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Prawo i Gospodarka' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Sroda' LIMIT 1), '13:00:00', '15:00:00', (SELECT id FROM public.sale WHERE numer = 'F67' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'wyklad');
+
+-- 15:15 - 17:15 (2h) | Język angielski | Ćwiczenia
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Język angielski' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Sroda' LIMIT 1), '15:15:00', '17:15:00', (SELECT id FROM public.sale WHERE numer = 'N14' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'cwiczenia');
+
+-- --- CZWARTEK (6 GODZIN ZAJĘĆ) ---
+-- 09:00 - 11:00 (2h) | Systemy Wbudowane | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Systemy Wbudowane' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Czwartek' LIMIT 1), '09:00:00', '11:00:00', (SELECT id FROM public.sale WHERE numer = 'F112' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'laboratorium');
+
+-- 11:15 - 13:15 (2h) | Chmury Obliczeniowe | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Chmury Obliczeniowe' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Czwartek' LIMIT 1), '11:15:00', '13:15:00', (SELECT id FROM public.sale WHERE numer = 'F110' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'wyklad');
+
+-- 13:30 - 15:30 (2h) | Chmury Obliczeniowe | Projekt
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Chmury Obliczeniowe' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Czwartek' LIMIT 1), '13:30:00', '15:30:00', (SELECT id FROM public.sale WHERE numer = 'F08' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'projekt');
+
+-- --- PIĄTEK (5 GODZIN ZAJĘĆ) ---
+-- 08:15 - 09:45 (1.5h) | Sztuczna Inteligencja | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Sztuczna Inteligencja' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Piatek' LIMIT 1), '08:15:00', '09:45:00', (SELECT id FROM public.sale WHERE numer = 'F67' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'wyklad');
+
+-- 10:00 - 11:30 (1.5h) | Sztuczna Inteligencja | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Sztuczna Inteligencja' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Piatek' LIMIT 1), '10:00:00', '11:30:00', (SELECT id FROM public.sale WHERE numer = 'F112' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'j.kowalski@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'laboratorium');
+
+-- 11:45 - 13:45 (2h) | Programowanie w Java | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Programowanie w Java' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Piatek' LIMIT 1), '11:45:00', '13:45:00', (SELECT id FROM public.sale WHERE numer = 'F110' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'a.nowak@wi.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'wi' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Informatyka' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Aplikacje Internetowe i Mobilne' LIMIT 1), 'WI-AIM-5', 'laboratorium');
+
+
+-- =========================================================================
+-- PLAN 2: ELEKTROTECHNIKA (Spec. Systemy Okrętowe)
+-- Równie gęsty plan, ale ulokowany na Wydziale Elektrycznym (Sale serii C)
+-- =========================================================================
+
+-- --- PONIEDZIAŁEK (8 GODZIN ZAJĘĆ - MARATON) ---
+-- 08:00 - 10:00 (2h) | Maszyny Elektryczne (W) | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Maszyny Elektryczne (W)' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Poniedzialek' LIMIT 1), '08:00:00', '10:00:00', (SELECT id FROM public.sale WHERE numer = 'C47a' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'wyklad');
+
+-- 10:15 - 13:15 (3h) | Energetyka Odnawialna | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Energetyka Odnawialna' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Poniedzialek' LIMIT 1), '10:15:00', '13:15:00', (SELECT id FROM public.sale WHERE numer = 'C122' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'laboratorium');
+
+-- 13:30 - 16:30 (3h) | Napędy Hybrydowe | Projekt
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Napędy Hybrydowe' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Poniedzialek' LIMIT 1), '13:30:00', '16:30:00', (SELECT id FROM public.sale WHERE numer = 'C215' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'projekt');
+
+
+-- --- WTOREK (5 GODZIN ZAJĘĆ) ---
+-- 09:00 - 11:00 (2h) | Maszyny Elektryczne (L) | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Maszyny Elektryczne (L)' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Wtorek' LIMIT 1), '09:00:00', '11:00:00', (SELECT id FROM public.sale WHERE numer = 'C122' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'laboratorium');
+
+-- 11:30 - 14:30 (3h) | Instalacje Elektryczne | Projekt
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Instalacje Elektryczne' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Wtorek' LIMIT 1), '11:30:00', '14:30:00', (SELECT id FROM public.sale WHERE numer = 'C215' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'projekt');
+
+
+-- --- ŚRODA (4 GODZINY ZAJĘĆ) ---
+-- 10:00 - 12:00 (2h) | Automatyka Okrętowa | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Automatyka Okrętowa' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Sroda' LIMIT 1), '10:00:00', '12:00:00', (SELECT id FROM public.sale WHERE numer = 'C215' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'wyklad');
+
+-- 12:15 - 14:15 (2h) | Teoria Sterowania | Ćwiczenia
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Teoria Sterowania' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Sroda' LIMIT 1), '12:15:00', '14:15:00', (SELECT id FROM public.sale WHERE numer = 'C122' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'cwiczenia');
+
+
+-- --- CZWARTEK (7 GODZIN ZAJĘĆ) ---
+-- 08:00 - 10:00 (2h) | Sieci Komputerowe | Ćwiczenia
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Sieci Komputerowe' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Czwartek' LIMIT 1), '08:00:00', '10:00:00', (SELECT id FROM public.sale WHERE numer = 'C215' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'cwiczenia');
+
+-- 10:15 - 13:15 (3h) | Elektronika Mocy | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Elektronika Mocy' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Czwartek' LIMIT 1), '10:15:00', '13:15:00', (SELECT id FROM public.sale WHERE numer = 'C122' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'laboratorium');
+
+-- 13:30 - 15:30 (2h) | Elektronika Mocy | Wykład
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Elektronika Mocy' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Czwartek' LIMIT 1), '13:30:00', '15:30:00', (SELECT id FROM public.sale WHERE numer = 'C47a' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'wyklad');
+
+
+-- --- PIĄTEK (6 GODZIN ZAJĘĆ) ---
+-- 08:30 - 11:30 (3h) | Mikrokontrolery w Architekturze Okrętowej | Laboratorium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Mikrokontrolery w Architekturze Okrętowej' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Piatek' LIMIT 1), '08:30:00', '11:30:00', (SELECT id FROM public.sale WHERE numer = 'C122' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'p.zielinski@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'laboratorium');
+
+
+-- 11:45 - 13:15 (1.5h) | Seminarium Dyplomowe | Seminarium
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Seminarium Dyplomowe' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Piatek' LIMIT 1), '11:45:00', '13:15:00', (SELECT id FROM public.sale WHERE numer = 'C215' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'seminarium');
+
+-- 13:30 - 15:00 (1.5h) | Projekt Układów Automatyki | Projekt
+INSERT INTO public.plany_zajec (kurs_id, dzien_id, godzina_od, godzina_do, sala_id, prowadzacy_id, wydzial_id, kierunek_id, specjalizacja_id, grupa_oznaczenie, typ_zajec)
+VALUES ((SELECT id FROM public.kursy WHERE nazwa = 'Projekt Układów Automatyki' LIMIT 1), (SELECT id FROM public.dzien_tygodnia_slownik WHERE nazwa = 'Piatek' LIMIT 1), '13:30:00', '15:00:00', (SELECT id FROM public.sale WHERE numer = 'C122' LIMIT 1), (SELECT id FROM public.uzytkownicy WHERE email = 'm.wisniewska@we.umg.edu.pl' LIMIT 1), (SELECT id FROM public.wydzialy WHERE skrot = 'we' LIMIT 1), (SELECT id FROM public.kierunki WHERE nazwa = 'Elektrotechnika' LIMIT 1), (SELECT id FROM public.specjalizacje WHERE nazwa = 'Systemy Okretowe' LIMIT 1), 'WE-SO-5', 'projekt');
 
 COMMIT;

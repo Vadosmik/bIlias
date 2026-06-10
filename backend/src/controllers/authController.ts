@@ -33,6 +33,9 @@ export class AuthController {
         imie: String(req.body?.imie ?? ''),
         nazwisko: String(req.body?.nazwisko ?? ''),
         role: req.body?.role ? String(req.body.role) : undefined,
+        wydzialId: req.body?.wydzialId ? Number(req.body.wydzialId) : undefined,
+        kierunekId: req.body?.kierunekId ? Number(req.body.kierunekId) : undefined,
+        specjalizacjaId: req.body?.specjalizacjaId ? Number(req.body.specjalizacjaId) : undefined,
       });
 
       res.status(201).json({

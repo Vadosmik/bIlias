@@ -104,8 +104,9 @@ export default function CourseDetailsPage() {
 		if (!editingItem || !id) return;
 		setIsActionLoading(true);
 		try {
-			if (editingItem.type === 'folder' && editingItem.dbId) {
-				await api.materials.renameFolder(editingItem.dbId, editForm.name);
+			if (editingItem.type === 'folder') {
+				const folderId = editingItem.dbId || Number(editingItem.id);
+				await api.materials.renameFolder(folderId, editForm.name);
 			} else if (editingItem.type === 'task') {
 				await api.tasks.update(editingItem.id, { title: editForm.name });
 			} else {
@@ -170,8 +171,9 @@ export default function CourseDetailsPage() {
 			return;
 		setIsActionLoading(true);
 		try {
-			if (editingItem.type === 'folder' && editingItem.dbId) {
-				await api.materials.deleteFolder(editingItem.dbId);
+			if (editingItem.type === 'folder') {
+				const folderId = editingItem.dbId || Number(editingItem.id);
+				await api.materials.deleteFolder(folderId);
 			} else if (editingItem.type === 'task') {
 				await api.tasks.delete(editingItem.id);
 			} else {
@@ -283,114 +285,7 @@ export default function CourseDetailsPage() {
 		return () => abortController.abort();
 	}, [selectedTask, user?.id]);
 
-	useEffect(() => {
-		if (editingItem) {
-			setEditForm({
-				name: editingItem.name,
-				description: editingItem.description || '',
-				deadline: editingItem.deadline || '',
-				folderName: '', // Selected target folder
-			});
-			setManagementStep('menu');
-		}
-	}, [editingItem]);
-
-	const isDeadlinePassed = (deadline?: string) => {
-		if (!deadline) return false;
-		return new Date(deadline) < new Date();
-	};
-
-	const fetchMaterials = async () => {
-		if (!id) return;
-		try {
-			const data = await api.materials.getByCourseId(Number(id));
-			setMaterials(data);
-		} catch (err) {
-			console.error('Failed to fetch materials:', err);
-		}
-	};
-
-	const handleRename = async () => {
-		if (!editingItem || !id) return;
-		setIsActionLoading(true);
-		try {
-			if (editingItem.type === 'folder') {
-				await api.materials.renameFolder(Number(id), editingItem.name, editForm.name);
-			} else if (editingItem.type === 'task') {
-				await api.tasks.update(editingItem.id, { title: editForm.name });
-			} else {
-				await api.materials.update(editingItem.id, { name: editForm.name });
-			}
-			await fetchMaterials();
-			setEditingItem(null);
-		} catch (err) {
-			console.error('Rename failed:', err);
-			alert('Błąd podczas zmiany nazwy');
-		} finally {
-			setIsActionLoading(false);
-		}
-	};
-
-	const handleUpdateTask = async () => {
-		if (!editingItem || editingItem.type !== 'task') return;
-		setIsActionLoading(true);
-		try {
-			await api.tasks.update(editingItem.id, {
-				title: editForm.name,
-				description: editForm.description,
-				deadline: editForm.deadline,
-			});
-			await fetchMaterials();
-			setEditingItem(null);
-		} catch (err) {
-			console.error('Task update failed:', err);
-			alert('Błąd podczas aktualizacji zadania');
-		} finally {
-			setIsActionLoading(false);
-		}
-	};
-
-	const handleMove = async (targetFolder: string) => {
-		if (!editingItem) return;
-		setIsActionLoading(true);
-		try {
-			if (editingItem.type === 'task') {
-				await api.tasks.update(editingItem.id, { folderName: targetFolder });
-			} else if (editingItem.type === 'file') {
-				await api.materials.update(editingItem.id, { folderName: targetFolder });
-			}
-			await fetchMaterials();
-			setEditingItem(null);
-		} catch (err) {
-			console.error('Move failed:', err);
-			alert('Błąd podczas przenoszenia elementu');
-		} finally {
-			setIsActionLoading(false);
-		}
-	};
-
-	const handleDelete = async () => {
-		if (!editingItem || !id || !confirm(`Czy na pewno chcesz usunąć: ${editingItem.name}?`)) return;
-		setIsActionLoading(true);
-		try {
-			if (editingItem.type === 'folder') {
-				await api.materials.deleteFolder(Number(id), editingItem.name);
-			} else if (editingItem.type === 'task') {
-				await api.tasks.delete(editingItem.id);
-			} else {
-				await api.materials.delete(editingItem.id);
-			}
-			await fetchMaterials();
-			setEditingItem(null);
-		} catch (err) {
-			console.error('Delete failed:', err);
-			alert('Błąd podczas usuwania elementu');
-		} finally {
-			setIsActionLoading(false);
-		}
-	};
-
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) {
 			setSubmittedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
 		}
@@ -1476,32 +1371,7 @@ export default function CourseDetailsPage() {
 							</select>
 						</div>
 
-						{submittedFiles.length > 0 && (
-							<div className='space-y-2 mb-4'>
-								{submittedFiles.map((file, idx) => (
-									<div
-										key={idx}
-										className='flex items-center justify-between p-3 bg-brand-light/50 rounded-xl border border-brand-gray/10 group'>
-										<div className='flex items-center gap-3 overflow-hidden'>
-											<FileText className='w-5 h-5 text-brand-navy/40' />
-											<div className='overflow-hidden text-left'>
-												<p className='text-xs font-bold text-brand-navy truncate'>
-													{file.name}
-												</p>
-												<p className='text-[10px] text-muted-foreground uppercase font-medium'>
-													{(file.size / 1024 / 1024).toFixed(2)} MB
-												</p>
-											</div>
-										</div>
-										<button
-											onClick={() => removeFile(idx)}
-											className='p-1.5 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100'>
-											<Trash2 className='w-4 h-4' />
-										</button>
-									</div>
-								))}
-							</div>
-						)}
+
 
 						<div className='space-y-2'>
 							<label className='text-xs font-bold text-brand-navy uppercase tracking-wider text-muted-foreground'>
