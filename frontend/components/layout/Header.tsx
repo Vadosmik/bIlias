@@ -48,9 +48,13 @@ export function Header() {
 					// Custom label logic
 					let label = segment;
 					if (label === 'courses') {
-						label = 'Kursy';
+						label = 'Wszystkie Kursy';
 					} else if (label === 'dashboard') {
-						label = 'Panel';
+						label = 'Panel Główny';
+					} else if (label === 'timetable') {
+						label = 'Plan Zajęć';
+					} else if (label === 'profile') {
+						label = 'Profil Użytkownika';
 					}
 					label =
 						label.charAt(0).toUpperCase() + label.slice(1).replace(/-/g, ' ');

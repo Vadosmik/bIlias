@@ -10,6 +10,10 @@ export function createProfileRoutes(profileController?: ProfileController) {
     controller.updateProfile(req, res);
   });
 
+  profileRoutes.get('/users/:userId/profile', (req: Request, res: Response) => {
+    controller.getFullProfile(req, res);
+  });
+
   profileRoutes.post('/profile/password', (req: Request, res: Response) => {
     controller.changePassword(req, res);
   });

@@ -9,20 +9,29 @@ export class ProfileController {
       const userId = Number(req.params.userId);
       const userRole = await this.profileService.getUserRole(userId);
 
+      const { dashboard_settings } = req.body;
+      if (dashboard_settings !== undefined) {
+        await this.profileService.updateDashboardSettings(userId, String(dashboard_settings));
+      }
+
       if (userRole === 'student') {
         const { wydzial_id, kierunek_id, specjalizacja_id } = req.body;
-        await this.profileService.updateStudentProfile(userId, {
-          wydzial_id: wydzial_id ? Number(wydzial_id) : undefined,
-          kierunek_id: kierunek_id ? Number(kierunek_id) : undefined,
-          specjalizacja_id: specjalizacja_id !== undefined
-            ? (specjalizacja_id ? Number(specjalizacja_id) : null)
-            : undefined,
-        });
+        if (wydzial_id !== undefined || kierunek_id !== undefined || specjalizacja_id !== undefined) {
+          await this.profileService.updateStudentProfile(userId, {
+            wydzial_id: wydzial_id ? Number(wydzial_id) : undefined,
+            kierunek_id: kierunek_id ? Number(kierunek_id) : undefined,
+            specjalizacja_id: specjalizacja_id !== undefined
+              ? (specjalizacja_id ? Number(specjalizacja_id) : null)
+              : undefined,
+          });
+        }
       } else {
         const { wydzial_id } = req.body;
-        await this.profileService.updateLecturerProfile(userId, {
-          wydzial_id: Number(wydzial_id),
-        });
+        if (wydzial_id !== undefined) {
+          await this.profileService.updateLecturerProfile(userId, {
+            wydzial_id: Number(wydzial_id),
+          });
+        }
       }
 
       res.status(200).json({
@@ -82,6 +91,29 @@ export class ProfileController {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Blad pobierania danych profilu';
+      res.status(500).json({
+        success: false,
+        error: message,
+      });
+    }
+  }
+
+  public async getFullProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = Number(req.params.userId);
+      const profile = await this.profileService.getFullProfile(userId);
+
+      if (!profile) {
+        res.status(404).json({ success: false, error: 'Uzytkownik nie znaleziony' });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        data: profile,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Blad pobierania profilu';
       res.status(500).json({
         success: false,
         error: message,

@@ -9,6 +9,7 @@ import {
 	Settings,
 	LogOut,
 	GraduationCap,
+	CalendarRange,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -25,6 +26,11 @@ const menuItems = [
 		title: 'Wszystkie Kursy',
 		icon: BookOpen,
 		href: '/courses',
+	},
+	{
+		title: 'Plan Zajęć',
+		icon: CalendarRange,
+		href: '/timetable',
 	},
 	// {
 	// 	title: 'Ustawienia',
@@ -77,37 +83,36 @@ export function Sidebar() {
 			</nav>
 
 			{/* User Footer */}
-            <div className='p-4 border-t border-white/10'>
-                <Link 
-                    href="/profile" 
-                    className={cn(
-                        'flex items-center gap-3 px-2 py-3 mb-2 rounded-xl transition-all duration-200 group',
-                        pathname === '/profile' 
-                            ? 'bg-brand-sand/10 border border-brand-sand/20' 
-                            : 'hover:bg-white/5'
-                    )}
-                >
-                    <div className='w-10 h-10 rounded-full bg-brand-sand/20 flex items-center justify-center text-brand-sand font-bold transition-transform group-hover:scale-105'>
-                        {user?.firstName?.[0]}
-                        {user?.lastName?.[0]}
-                    </div>
-                    <div className='overflow-hidden-1 flex-1'>
-                        <p className='text-sm font-semibold truncate group-hover:text-brand-sand transition-colors'>
-                            {user?.firstName} {user?.lastName}
-                        </p>
-                        <p className='text-[10px] text-white/40 uppercase font-bold tracking-wider'>
-                            {user?.role}
-                        </p>
-                    </div>
-                </Link>
-                
-                <button
-                    onClick={logout}
-                    className='flex items-center gap-3 w-full px-4 py-3 text-white/50 hover:text-brand-light transition-colors rounded-xl hover:bg-brand-light/10'>
-                    <LogOut className='w-5 h-5' />
-                    <span className='text-sm font-medium'>Wyloguj się</span>
-                </button>
-            </div>
+			<div className='p-4 border-t border-white/10'>
+				<Link
+					href='/profile'
+					className={cn(
+						'flex items-center gap-3 px-2 py-3 mb-2 rounded-xl transition-all duration-200 group',
+						pathname === '/profile'
+							? 'bg-brand-sand/10 border border-brand-sand/20'
+							: 'hover:bg-white/5',
+					)}>
+					<div className='w-10 h-10 rounded-full bg-brand-sand/20 flex items-center justify-center text-brand-sand font-bold transition-transform group-hover:scale-105'>
+						{user?.firstName?.[0]}
+						{user?.lastName?.[0]}
+					</div>
+					<div className='overflow-hidden-1 flex-1'>
+						<p className='text-sm font-semibold truncate group-hover:text-brand-sand transition-colors'>
+							{user?.firstName} {user?.lastName}
+						</p>
+						<p className='text-[10px] text-white/40 uppercase font-bold tracking-wider'>
+							{user?.role}
+						</p>
+					</div>
+				</Link>
+
+				<button
+					onClick={logout}
+					className='flex items-center gap-3 w-full px-4 py-3 text-white/50 hover:text-brand-light transition-colors rounded-xl hover:bg-brand-light/10'>
+					<LogOut className='w-5 h-5' />
+					<span className='text-sm font-medium'>Wyloguj się</span>
+				</button>
+			</div>
 		</aside>
 	);
 }

@@ -161,6 +161,20 @@ export class MaterialService {
     });
   }
 
+  public async createTask(params: {
+    kursId: number;
+    title: string;
+    description: string;
+    deadline: string;
+  }) {
+    return await zadanieRepository.createTask({
+      kursId: params.kursId,
+      tytul: params.title,
+      opis: params.description,
+      terminOddania: params.deadline
+    });
+  }
+
   public async getMaterialForDownload(materialId: number) {
     const material = await materialRepository.findByMaterialId(materialId);
     

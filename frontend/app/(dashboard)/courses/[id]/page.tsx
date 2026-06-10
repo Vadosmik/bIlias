@@ -104,8 +104,9 @@ export default function CourseDetailsPage() {
 		if (!editingItem || !id) return;
 		setIsActionLoading(true);
 		try {
-			if (editingItem.type === 'folder' && editingItem.dbId) {
-				await api.materials.renameFolder(editingItem.dbId, editForm.name);
+			if (editingItem.type === 'folder') {
+				const folderId = editingItem.dbId || Number(editingItem.id);
+				await api.materials.renameFolder(folderId, editForm.name);
 			} else if (editingItem.type === 'task') {
 				await api.tasks.update(editingItem.id, { title: editForm.name });
 			} else {
@@ -170,8 +171,9 @@ export default function CourseDetailsPage() {
 			return;
 		setIsActionLoading(true);
 		try {
-			if (editingItem.type === 'folder' && editingItem.dbId) {
-				await api.materials.deleteFolder(editingItem.dbId);
+			if (editingItem.type === 'folder') {
+				const folderId = editingItem.dbId || Number(editingItem.id);
+				await api.materials.deleteFolder(folderId);
 			} else if (editingItem.type === 'task') {
 				await api.tasks.delete(editingItem.id);
 			} else {
@@ -283,7 +285,7 @@ export default function CourseDetailsPage() {
 		return () => abortController.abort();
 	}, [selectedTask, user?.id]);
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) {
 			setSubmittedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
 		}
@@ -1321,27 +1323,6 @@ export default function CourseDetailsPage() {
 							</>
 						)}
 
-						<div className='space-y-2'>
-							<label className='text-xs font-bold text-brand-navy uppercase tracking-wider text-muted-foreground'>
-								Folder docelowy
-							</label>
-							<select
-								className='w-full p-3 bg-brand-light border-none rounded-xl text-sm focus:ring-2 focus:ring-brand-sand transition-all'
-								value={selectedTargetFolder || ''}
-								onChange={e =>
-									setSelectedTargetFolder(
-										e.target.value ? Number(e.target.value) : null,
-									)
-								}>
-								<option value=''>Główny katalog</option>
-								{allFolders.map(f => (
-									<option key={f.id} value={f.id}>
-										{f.name}
-									</option>
-								))}
-							</select>
-						</div>
-
 						{submittedFiles.length > 0 && (
 							<div className='space-y-2 mb-4'>
 								{submittedFiles.map((file, idx) => (
@@ -1368,6 +1349,29 @@ export default function CourseDetailsPage() {
 								))}
 							</div>
 						)}
+
+						<div className='space-y-2'>
+							<label className='text-xs font-bold text-brand-navy uppercase tracking-wider text-muted-foreground'>
+								Folder docelowy
+							</label>
+							<select
+								className='w-full p-3 bg-brand-light border-none rounded-xl text-sm focus:ring-2 focus:ring-brand-sand transition-all'
+								value={selectedTargetFolder || ''}
+								onChange={e =>
+									setSelectedTargetFolder(
+										e.target.value ? Number(e.target.value) : null,
+									)
+								}>
+								<option value=''>Główny katalog</option>
+								{allFolders.map(f => (
+									<option key={f.id} value={f.id}>
+										{f.name}
+									</option>
+								))}
+							</select>
+						</div>
+
+
 
 						<div className='space-y-2'>
 							<label className='text-xs font-bold text-brand-navy uppercase tracking-wider text-muted-foreground'>

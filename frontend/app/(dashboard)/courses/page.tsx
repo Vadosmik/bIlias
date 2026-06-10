@@ -14,37 +14,52 @@ import { cn } from '@/lib/utils';
 import { api, Course } from '@/lib/api';
 import Link from 'next/link';
 
-const departments = [
-	'Wszystkie Wydziały',
-	'Wydział Elektryczny',
-	'Wydział Informatyczny',
-	'Wydział Nawigacyjny',
-	'Wydział Mechaniczny',
-	'Wydział Zarządzania i Nauk o Jakości',
-];
-
 const semesters = ['Wszystkie', '1', '2', '3', '4', '5', '6', '7', '8'];
 
 export default function CoursesPage() {
 	const { user } = useAuth();
 	const [courses, setCourses] = useState<Course[]>([]);
+	const [departments, setDepartments] = useState<string[]>([
+		'Wszystkie Wydziały',
+	]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState('');
-	const [selectedDept, setSelectedDept] = useState(
-		user?.department || departments[0],
-	);
+	const [selectedDept, setSelectedDept] = useState('Wszystkie Wydziały');
 	const [selectedSem, setSelectedSem] = useState(
 		user?.semester?.toString() || semesters[0],
 	);
 	const [joiningId, setJoiningId] = useState<number | null>(null);
 
 	useEffect(() => {
-		const fetchCourses = async () => {
-			const data = await api.courses.getAll(user?.id);
-			setCourses(data);
-			setIsLoading(false);
+		const fetchData = async () => {
+			try {
+				const [coursesData, deptsData] = await Promise.all([
+					api.courses.getAll(user?.id),
+					api.dictionaries.getDepartments(),
+				]);
+
+				setCourses(coursesData);
+				setDepartments([
+					'Wszystkie Wydziały',
+					...deptsData.map((d: any) => d.nazwa),
+				]);
+
+				// Fetch profile to get latest department name from DB
+				if (user?.id) {
+					const profile = await api.profile.get(user.id);
+					if (profile.academic?.wydzial_nazwa) {
+						setSelectedDept(profile.academic.wydzial_nazwa);
+					} else if (user?.department) {
+						setSelectedDept(user.department);
+					}
+				}
+			} catch (err) {
+				console.error('Failed to fetch courses data:', err);
+			} finally {
+				setIsLoading(false);
+			}
 		};
-		fetchCourses();
+		fetchData();
 	}, [user]);
 
 	const handleJoin = async (id: number) => {
@@ -108,7 +123,7 @@ export default function CoursesPage() {
 
 				{/* Department Select */}
 				<div className='flex items-center gap-2 w-full md:w-auto'>
-					<Filter className='w-4 h-4 text-muted-foreground hidden md:block' />
+					<Filter className='w-4 h-4 text-muted-foreground' />
 					<select
 						className='bg-brand-light border-none rounded-xl text-sm py-2.5 px-4 focus:ring-2 focus:ring-brand-sand w-full'
 						value={selectedDept}

@@ -8,6 +8,7 @@ import { materialRoutes } from './routes/materialRoutes.js';
 import { submissionRoutes } from './routes/submissionRoutes.js';
 import { profileRoutes } from './routes/profileRoutes.js';
 import { timetableRoutes } from './routes/timetableRoutes.js';
+import { dictionaryRoutes } from './routes/dictionaryRoutes.js';
 import path from 'path';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/submissions', submissionRoutes);
 app.use('/', materialRoutes);
 app.use('/', profileRoutes);
 app.use('/timetable', timetableRoutes);
+app.use('/dictionaries', dictionaryRoutes);
 app.use('/uploads', express.static('uploads'));
 app.use(errorHandler);
 

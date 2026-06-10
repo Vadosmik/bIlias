@@ -153,6 +153,14 @@ export const userRepository = {
     );
   },
 
+  async updateDashboardSettings(userId: number, settings: string): Promise<void> {
+    await pool.query(
+      `UPDATE uzytkownicy SET ustawienia_dashboard = $1::bit varying, zaktualizowano = NOW()
+       WHERE id = $2`,
+      [settings, userId]
+    );
+  },
+
   async getProfileCompleteness(userId: number): Promise<{ complete: boolean; missing: string[] }> {
     const roles = await this.getUserRoles(userId);
     const roleName = roles[0]?.role || 'student';
@@ -177,5 +185,48 @@ export const userRepository = {
     }
 
     return { complete: missing.length === 0, missing };
+  },
+
+  async getFullProfile(userId: number) {
+    const userResult = await pool.query(
+      `SELECT u.id, u.email, u.imie, u.nazwisko, r.nazwa as role, u.ustawienia_dashboard::text
+       FROM uzytkownicy u
+       LEFT JOIN uzytkownik_role ur ON u.id = ur.user_id
+       LEFT JOIN role r ON ur.role_id = r.id
+       WHERE u.id = $1`,
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) return null;
+    const user = userResult.rows[0];
+
+    let academicData = null;
+    if (user.role === 'student') {
+      const studentResult = await pool.query(
+        `SELECT s.wydzial_id, s.kierunek_id, s.specjalizacja_id, s.numer_albumu,
+                w.nazwa as wydzial_nazwa, k.nazwa as kierunek_nazwa, sp.nazwa as specjalizacja_nazwa
+         FROM studenci s
+         LEFT JOIN wydzialy w ON s.wydzial_id = w.id
+         LEFT JOIN kierunki k ON s.kierunek_id = k.id
+         LEFT JOIN specjalizacje sp ON s.specjalizacja_id = sp.id
+         WHERE s.student_id = $1`,
+        [userId]
+      );
+      academicData = studentResult.rows[0] || null;
+    } else if (user.role === 'prowadzacy') {
+      const lecturerResult = await pool.query(
+        `SELECT p.wydzial_id, w.nazwa as wydzial_nazwa
+         FROM prowadzacy p
+         LEFT JOIN wydzialy w ON p.wydzial_id = w.id
+         WHERE p.prowadzacy_id = $1`,
+        [userId]
+      );
+      academicData = lecturerResult.rows[0] || null;
+    }
+
+    return {
+      ...user,
+      academic: academicData
+    };
   },
 };

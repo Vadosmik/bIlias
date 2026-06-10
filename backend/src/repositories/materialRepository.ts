@@ -131,6 +131,46 @@ export const materialRepository = {
     await pool.query('UPDATE public.materialy SET deleted_at = NOW() WHERE id = $1', [id]);
   },
 
+  async updateMaterial(id: number, data: { tytul?: string }): Promise<void> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (data.tytul !== undefined) {
+      fields.push(`tytul = $${idx++}`);
+      values.push(data.tytul);
+    }
+
+    if (fields.length === 0) return;
+
+    values.push(id);
+    await pool.query(
+      `UPDATE materialy SET ${fields.join(', ')} WHERE id = $${idx}`,
+      values
+    );
+  },
+
+  async deleteMaterial(id: number): Promise<void> {
+    await pool.query('UPDATE materialy SET deleted_at = NOW() WHERE id = $1', [id]);
+  },
+
+  async deleteByFolderPrefix(kursId: number, folderPrefix: string): Promise<void> {
+    await pool.query(
+      `UPDATE materialy SET deleted_at = NOW() 
+       WHERE kurs_id = $1 AND (tytul = $2 OR tytul LIKE $3) AND deleted_at IS NULL`,
+      [kursId, folderPrefix, `${folderPrefix} - %`]
+    );
+  },
+
+  async findByKursIdAndFolderPrefix(kursId: number, folderPrefix: string): Promise<Material[]> {
+    const result = await pool.query(
+      `SELECT * FROM materialy 
+       WHERE kurs_id = $1 AND (tytul = $2 OR tytul LIKE $3) AND deleted_at IS NULL`,
+      [kursId, folderPrefix, `${folderPrefix} - %`]
+    );
+    return result.rows;
+  },
+
   async findTypPlikuById(id: number): Promise<TypPliku | null> {
     const result = await pool.query(
       'SELECT * FROM public.typ_pliku_slownik WHERE id = $1',

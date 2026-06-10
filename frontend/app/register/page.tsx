@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -10,9 +10,11 @@ import {
 	User,
 	AlertCircle,
 	CheckCircle2,
+	ChevronDown,
 } from 'lucide-react';
 import { AuthShell } from '@/components/AuthShell';
 import { api } from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 export default function RegisterPage() {
 	const router = useRouter();
@@ -24,6 +26,48 @@ export default function RegisterPage() {
 	const [accepted, setAccepted] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	// Academic data
+	const [departments, setDepartments] = useState<any[]>([]);
+	const [courses, setCourses] = useState<any[]>([]);
+	const [specializations, setSpecializations] = useState<any[]>([]);
+
+	const [academic, setAcademic] = useState({
+		wydzialId: '',
+		kierunekId: '',
+		specjalizacjaId: '',
+	});
+
+	useEffect(() => {
+		const loadDepts = async () => {
+			try {
+				const data = await api.dictionaries.getDepartments();
+				setDepartments(data);
+			} catch (err) {
+				console.error('Failed to load departments');
+			}
+		};
+		loadDepts();
+	}, []);
+
+	const handleWydzialChange = async (id: string) => {
+		setAcademic({ wydzialId: id, kierunekId: '', specjalizacjaId: '' });
+		setCourses([]);
+		setSpecializations([]);
+		if (id) {
+			const data = await api.dictionaries.getCourses(Number(id));
+			setCourses(data);
+		}
+	};
+
+	const handleKierunekChange = async (id: string) => {
+		setAcademic(prev => ({ ...prev, kierunekId: id, specjalizacjaId: '' }));
+		setSpecializations([]);
+		if (id) {
+			const data = await api.dictionaries.getSpecializations(Number(id));
+			setSpecializations(data);
+		}
+	};
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -54,6 +98,16 @@ export default function RegisterPage() {
 			return;
 		}
 
+		if (!academic.wydzialId) {
+			setError('Wybierz swój wydział');
+			return;
+		}
+
+		if (role === 'student' && !academic.kierunekId) {
+			setError('Wybierz swój kierunek studiów');
+			return;
+		}
+
 		if (!accepted) {
 			setError('Musisz zaakceptować regulamin platformy');
 			return;
@@ -68,6 +122,9 @@ export default function RegisterPage() {
 				imie: firstName,
 				nazwisko: lastName,
 				role: roleToSend,
+				wydzialId: Number(academic.wydzialId),
+				kierunekId: academic.kierunekId ? Number(academic.kierunekId) : undefined,
+				specjalizacjaId: academic.specjalizacjaId ? Number(academic.specjalizacjaId) : undefined,
 			});
 			router.push('/login');
 		} catch (err) {
@@ -155,6 +212,37 @@ export default function RegisterPage() {
 					required
 				/>
 				<PasswordStrength value={password} />
+
+				{/* Academic Fields */}
+				<div className='space-y-4 pt-2 border-t border-border/40'>
+					<SelectField
+						label='Wydział'
+						value={academic.wydzialId}
+						onChange={handleWydzialChange}
+						options={departments}
+						placeholder='Wybierz wydział'
+					/>
+
+					{role === 'student' && academic.wydzialId && (
+						<SelectField
+							label='Kierunek'
+							value={academic.kierunekId}
+							onChange={handleKierunekChange}
+							options={courses}
+							placeholder='Wybierz kierunek'
+						/>
+					)}
+
+					{role === 'student' && academic.kierunekId && specializations.length > 0 && (
+						<SelectField
+							label='Specjalizacja (opcjonalnie)'
+							value={academic.specjalizacjaId}
+							onChange={(id) => setAcademic(prev => ({ ...prev, specjalizacjaId: id }))}
+							options={specializations}
+							placeholder='Wybierz specjalizację'
+						/>
+					)}
+				</div>
 
 				<label className='flex items-start gap-2 text-sm text-muted-foreground'>
 					<input
@@ -245,6 +333,42 @@ function Field({
 					required={required}
 					className='h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20'
 				/>
+			</div>
+		</label>
+	);
+}
+
+function SelectField({
+	label,
+	value,
+	onChange,
+	options,
+	placeholder,
+}: {
+	label: string;
+	value: string;
+	onChange: (v: string) => void;
+	options: any[];
+	placeholder: string;
+}) {
+	return (
+		<label className='block'>
+			<span className='mb-1.5 block text-sm font-medium text-foreground'>
+				{label}
+			</span>
+			<div className='relative'>
+				<select
+					value={value}
+					onChange={e => onChange(e.target.value)}
+					className='h-11 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors appearance-none cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/20'>
+					<option value=''>{placeholder}</option>
+					{options.map(opt => (
+						<option key={opt.id} value={opt.id}>
+							{opt.nazwa}
+						</option>
+					))}
+				</select>
+				<ChevronDown className='absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none' />
 			</div>
 		</label>
 	);

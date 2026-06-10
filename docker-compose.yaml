@@ -11,6 +11,7 @@ services:
       - app-net
     depends_on:
       - backend
+      - db
 
   backend:
     build: ./backend
