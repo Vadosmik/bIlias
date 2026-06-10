@@ -6,9 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
 	LayoutDashboard,
 	BookOpen,
-	Settings,
 	LogOut,
-	GraduationCap,
 	CalendarRange,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';

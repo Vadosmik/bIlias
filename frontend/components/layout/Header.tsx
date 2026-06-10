@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight, Home, Bell, Search, Moon, Sun } from 'lucide-react';
+import { ChevronRight, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api, Course } from '@/lib/api';
 
@@ -39,7 +39,7 @@ export function Header() {
 				<Link
 					href='/dashboard'
 					className='text-muted-foreground hover:text-brand-navy transition-colors flex items-center'>
-					<Home className='w-5 h-5' />
+					<LayoutDashboard className='w-5 h-5' />
 				</Link>
 
 				{pathSegments.map((segment, index) => {
