@@ -95,8 +95,8 @@ export class AuthService {
       );
     } else if (!isTeacher) {
       await pool.query(
-        'INSERT INTO public.studenci (student_id, wydzial_id, kierunek_id, specjalizacja_id, status) VALUES ($1, $2, $3, $4, $5)',
-        [user.id, parsed.data.wydzialId, parsed.data.kierunekId, parsed.data.specjalizacjaId, 'aktywny']
+        'INSERT INTO public.studenci (student_id, wydzial_id, kierunek_id, specjalizacja_id, status, rok_studiow) VALUES ($1, $2, $3, $4, $5, $6)',
+        [user.id, parsed.data.wydzialId, parsed.data.kierunekId, parsed.data.specjalizacjaId, 'aktywny', 1]
       );
     }
 

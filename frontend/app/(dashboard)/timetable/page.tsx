@@ -101,39 +101,46 @@ export default function TimetablePage() {
 				setInstructors(instrs);
 				setRooms(rms);
 
-				// Pre-select user's department if available
+				// Pre-select user's department or instructor if available
 				if (user?.id) {
-					const profile = await api.profile.get(user.id);
-					if (profile.academic?.wydzial_id) {
-						setFilters(prev => ({
-							...prev,
-							wydzialId: profile.academic.wydzial_id.toString(),
-						}));
+					const isTeacher = user.role === 'prowadzacy' || user.role === 'teacher';
+					let initialFilters: any = {};
+					
+					if (isTeacher) {
+						initialFilters.prowadzacyId = user.id.toString();
+					}
 
-						// Load courses for this department
-						const coursesData = await api.dictionaries.getCourses(
-							profile.academic.wydzial_id,
-						);
-						setCourses(coursesData);
+					try {
+						const profile = await api.profile.get(user.id);
+						if (profile.academic?.wydzial_id) {
+							initialFilters.wydzialId = profile.academic.wydzial_id.toString();
 
-						if (profile.academic.kierunek_id) {
-							setFilters(prev => ({
-								...prev,
-								kierunekId: profile.academic.kierunek_id.toString(),
-							}));
-							const specsData = await api.dictionaries.getSpecializations(
-								profile.academic.kierunek_id,
+							// Load courses for this department
+							const coursesData = await api.dictionaries.getCourses(
+								profile.academic.wydzial_id,
 							);
-							setSpecializations(specsData);
+							setCourses(coursesData);
 
-							if (profile.academic.specjalizacja_id) {
-								setFilters(prev => ({
-									...prev,
-									specjalizacjaId: profile.academic.specjalizacja_id.toString(),
-								}));
+							if (profile.academic.kierunek_id) {
+								initialFilters.kierunekId = profile.academic.kierunek_id.toString();
+								const specsData = await api.dictionaries.getSpecializations(
+									profile.academic.kierunek_id,
+								);
+								setSpecializations(specsData);
+
+								if (profile.academic.specjalizacja_id) {
+									initialFilters.specjalizacjaId = profile.academic.specjalizacja_id.toString();
+								}
 							}
 						}
+					} catch (e) {
+						console.error('Failed to load academic profile details', e);
 					}
+					
+					setFilters(prev => ({
+						...prev,
+						...initialFilters
+					}));
 				}
 			} catch (err) {
 				console.error('Failed to load timetable dictionaries:', err);

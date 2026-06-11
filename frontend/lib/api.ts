@@ -128,7 +128,7 @@ export const api = {
 	tasks: {
 		create: async (
 			courseId: number,
-			data: { title: string; description: string; deadline: string },
+			data: { title: string; description: string; deadline: string; folderId?: number | null },
 		): Promise<any> => {
 			return request(`/courses/${courseId}/tasks`, {
 				method: 'POST',
@@ -137,7 +137,7 @@ export const api = {
 		},
 		update: async (
 			taskId: string | number,
-			data: { title?: string; description?: string; deadline?: string },
+			data: { title?: string; description?: string; deadline?: string; folderId?: number | null },
 		): Promise<void> => {
 			const id =
 				typeof taskId === 'string' && taskId.startsWith('t-')

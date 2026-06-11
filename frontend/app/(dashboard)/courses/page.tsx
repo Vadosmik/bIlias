@@ -224,7 +224,7 @@ export default function CoursesPage() {
 											<button
 												onClick={() => handleJoin(course.id)}
 												disabled={joiningId === course.id}
-												className='inline-flex items-center gap-1.5 bg-brand-sand text-brand-navy font-bold text-sm px-4 py-2 rounded-lg hover:scale-105 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:scale-100'>
+												className='inline-flex items-center gap-1.5 bg-brand-navy text-white font-bold text-sm px-4 py-2 rounded-lg hover:scale-105 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:scale-100'>
 												{joiningId === course.id ? (
 													<Loader2 className='w-4 h-4 animate-spin' />
 												) : (

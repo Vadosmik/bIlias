@@ -131,28 +131,6 @@ export const materialRepository = {
     await pool.query('UPDATE public.materialy SET deleted_at = NOW() WHERE id = $1', [id]);
   },
 
-  async updateMaterial(id: number, data: { tytul?: string }): Promise<void> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let idx = 1;
-
-    if (data.tytul !== undefined) {
-      fields.push(`tytul = $${idx++}`);
-      values.push(data.tytul);
-    }
-
-    if (fields.length === 0) return;
-
-    values.push(id);
-    await pool.query(
-      `UPDATE materialy SET ${fields.join(', ')} WHERE id = $${idx}`,
-      values
-    );
-  },
-
-  async deleteMaterial(id: number): Promise<void> {
-    await pool.query('UPDATE materialy SET deleted_at = NOW() WHERE id = $1', [id]);
-  },
 
   async deleteByFolderPrefix(kursId: number, folderPrefix: string): Promise<void> {
     await pool.query(
